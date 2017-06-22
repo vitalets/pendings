@@ -1,2 +1,2 @@
 # Pendings
-Manipulation of pending promises list.
+Manipulator of pending promises.
