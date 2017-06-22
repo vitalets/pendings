@@ -10,17 +10,21 @@
     "code": "npm run lint-all",
     "lint-all": "eslint src test",
     "lint-staged": "lint-staged",
-    "precommit": "npm run lint-staged",
-    "prepush": "npm run code"
+    "test": "mocha test/*.test.js --require=test/globals.js",
+    "precommit": "npm run lint-staged && npm t",
+    "prepush": "npm run code && npm t"
   },
   "lint-staged": {
     "{src,test}/**/*.js": "eslint"
   },
   "main": "src/index.js",
   "devDependencies": {
+    "chai": "^4.0.2",
+    "chai-as-promised": "^7.0.0",
     "eslint": "^4.0.0",
     "husky": "^0.13.4",
-    "lint-staged": "^4.0.0"
+    "lint-staged": "^4.0.0",
+    "mocha": "^3.4.2"
   },
   "keywords": [
     "promise"
