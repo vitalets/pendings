@@ -1,0 +1,29 @@
+{
+  "name": "pendings",
+  "version": "0.1.0",
+  "description": "Manipulator of pending promises",
+  "author": {
+    "name": "Vitaliy Potapov",
+    "email": "noginsk@rambler.ru"
+  },
+  "scripts": {
+    "code": "npm run lint-all",
+    "lint-all": "eslint src test",
+    "lint-staged": "lint-staged",
+    "precommit": "npm run lint-staged",
+    "prepush": "npm run code"
+  },
+  "lint-staged": {
+    "{src,test}/**/*.js": "eslint"
+  },
+  "main": "src/index.js",
+  "devDependencies": {
+    "eslint": "^4.0.0",
+    "husky": "^0.13.4",
+    "lint-staged": "^4.0.0"
+  },
+  "keywords": [
+    "promise"
+  ],
+  "license": "MIT"
+}
