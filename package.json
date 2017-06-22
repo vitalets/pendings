@@ -11,6 +11,9 @@
     "lint-all": "eslint src test",
     "lint-staged": "lint-staged",
     "test": "mocha test/specs --require=test/globals.js",
+    "release": "npm run code && npm test && npm version $VER && npm publish && git push --follow-tags --no-verify",
+    "release-patch": "VER=patch npm run release",
+    "release-minor": "VER=minor npm run release",
     "precommit": "npm run lint-staged && npm t",
     "prepush": "npm run code && npm t"
   },
