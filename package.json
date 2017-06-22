@@ -10,7 +10,7 @@
     "code": "npm run lint-all",
     "lint-all": "eslint src test",
     "lint-staged": "lint-staged",
-    "test": "mocha test/*.test.js --require=test/globals.js",
+    "test": "mocha test/specs --require=test/globals.js",
     "precommit": "npm run lint-staged && npm t",
     "prepush": "npm run code && npm t"
   },
