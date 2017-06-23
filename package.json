@@ -46,7 +46,14 @@
     "mocha": "^3.4.2"
   },
   "keywords": [
-    "promise"
+    "promise",
+    "promises",
+    "resolve",
+    "reject",
+    "fulfill",
+    "promise-library",
+    "promise-wrapper",
+    "promise-api"
   ],
   "license": "MIT"
 }
