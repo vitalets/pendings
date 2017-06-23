@@ -1,7 +1,12 @@
 # Pendings
+
+[![Build Status](https://travis-ci.org/vitalets/pendings.svg?branch=master)](https://travis-ci.org/vitalets/pendings)
+[![npm](https://img.shields.io/npm/v/pendings.svg)](https://www.npmjs.com/package/pendings)
+[![license](https://img.shields.io/npm/l/pendings.svg)](https://www.npmjs.com/package/pendings)
+
 > Better control of pending promises
 
-This library provides better control of [Promises](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise)
+*Pendings* provides better control of pending [Promises](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise)
 by automatic managing their `resolve | reject` callbacks.
 
 ## Motivation
