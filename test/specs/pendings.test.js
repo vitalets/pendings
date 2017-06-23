@@ -110,7 +110,32 @@ describe('pendings', function () {
     it('should throw if called with the same id', function () {
       this.pendings.set(1, () => {});
       const res = this.pendings.set(1, () => {});
-      return assert.isRejected(res, 'Promise with id 1 already pending');
+      return assert.isRejected(res, 'Promise with id 1 is already pending');
+    });
+  });
+
+  describe('has', function () {
+
+    it('should return false for non-existing promise', function () {
+      assert.notOk(this.pendings.has(1));
+    });
+
+    it('should return true for pending promise', function () {
+      this.pendings.set(1, () => {});
+      assert.ok(this.pendings.has(1));
+    });
+
+    it('should return false for resolved promise', function () {
+      this.pendings.set(1, () => {});
+      this.pendings.resolve(1);
+      assert.notOk(this.pendings.has(1));
+    });
+
+    it('should return false for rejected promise', function () {
+      const res = this.pendings.set(1, () => {});
+      this.pendings.reject(1);
+      assert.isRejected(res);
+      assert.notOk(this.pendings.has(1));
     });
   });
 

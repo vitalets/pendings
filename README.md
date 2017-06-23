@@ -7,7 +7,7 @@
 > Better control of pending promises
 
 *Pendings* provides better control of pending [Promises](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise)
-by automatic managing their `resolve` / `reject` callbacks.
+by automatic managing `resolve` / `reject` callbacks.
 
 ## Installation
 ```bash
@@ -91,8 +91,9 @@ class MyClass {
 ## API
 
 * `Pendings` - controls list of promises
-  * `.add(fn)` - calls `fn` and returns new promise. `fn` gets unique `id` as parameter. 
-  * `.set(id, fn)` - calls `fn` and returns new promise with specified `id`.
+  * `.add(fn)` - calls `fn` and returns new promise. `fn` gets unique `id` as parameter
+  * `.set(id, fn)` - calls `fn` and returns new promise with specified `id`
+  * `.has(id)` - does promise with specified `id` exist
   * `.resolve(id, value)` - resolves pending promise by `id` with specified `value`
   * `.reject(id, reason)` - rejects pending promise by `id` with specified `reason`
   * `.fulfill(id, reason)` - rejects pending promise if `reason` is specified, otherwise resolves with empty value 

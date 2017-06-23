@@ -20,7 +20,7 @@ class Pendings {
     const pending = new Pending();
     return pending.call(() => {
       if (this._map[id]) {
-        throw new Error(`Promise with id ${id} already pending`);
+        throw new Error(`Promise with id ${id} is already pending`);
       }
       this._map[id] = pending;
       try {
@@ -29,6 +29,10 @@ class Pendings {
         this.reject(id, e);
       }
     });
+  }
+
+  has(id) {
+    return Boolean(this._map[id]);
   }
 
   resolve(id, data) {
