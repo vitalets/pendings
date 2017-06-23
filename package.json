@@ -1,6 +1,6 @@
 {
   "name": "pendings",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Better control of pending promises",
   "author": {
     "name": "Vitaliy Potapov",
@@ -31,7 +31,9 @@
   },
   "main": "lib/index.js",
   "babel": {
-    "presets": ["es2015"]
+    "presets": [
+      "es2015"
+    ]
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
