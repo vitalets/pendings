@@ -15,7 +15,7 @@ npm install pendings --save
 ```
 
 ## Example
-In promise-based classes sometimes we need to store `resolve` / `reject` callbacks for future promise fulfillment. 
+In promise-based class sometimes we store `resolve` / `reject` callbacks for future promise fulfillment. 
 E.g.:
 ```js
 class MyClass {
