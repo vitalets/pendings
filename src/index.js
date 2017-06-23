@@ -8,7 +8,7 @@ const Pending = require('./pending');
 
 module.exports = class Pendings {
   constructor() {
-    this._map = {};
+    this._map = Object.create(null);
   }
 
   add(fn) {
@@ -19,6 +19,9 @@ module.exports = class Pendings {
   set(id, fn) {
     const pending = new Pending();
     return pending.call(() => {
+      if (this._map[id]) {
+        throw new Error(`Promise with id ${id} already pending`);
+      }
       this._map[id] = pending;
       try {
         fn(id);
@@ -26,16 +29,6 @@ module.exports = class Pendings {
         this.reject(id, e);
       }
     });
-  }
-
-  _get(id) {
-    const pending = this._map[id];
-    if (!pending) {
-      throw new Error(`Pending promise with id ${id} not found`);
-    } else {
-      delete this._map[id];
-    }
-    return pending;
   }
 
   resolve(id, data) {
@@ -52,5 +45,15 @@ module.exports = class Pendings {
 
   generateId() {
     return `${Date.now()}-${Math.random()}`;
+  }
+
+  _get(id) {
+    const pending = this._map[id];
+    if (!pending) {
+      throw new Error(`Pending promise with id ${id} not found`);
+    } else {
+      delete this._map[id];
+    }
+    return pending;
   }
 };
