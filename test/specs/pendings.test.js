@@ -124,4 +124,8 @@ describe('pendings', function () {
     this.pendings.generateId = () => 1;
     this.pendings.add(id => assert.equal(id, 1));
   });
+
+  it('should export Pending as prop', function () {
+    assert.ok(Pendings.Pending);
+  });
 });

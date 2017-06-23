@@ -6,7 +6,7 @@
 
 const Pending = require('./pending');
 
-module.exports = class Pendings {
+class Pendings {
   constructor() {
     this._map = Object.create(null);
   }
@@ -56,4 +56,7 @@ module.exports = class Pendings {
     }
     return pending;
   }
-};
+}
+
+module.exports = Pendings;
+module.exports.Pending = Pending;
