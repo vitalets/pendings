@@ -6,11 +6,19 @@
     "name": "Vitaliy Potapov",
     "email": "noginsk@rambler.ru"
   },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/vitalets/pendings.git"
+  },
+  "engines": {
+    "node": ">=4"
+  },
   "scripts": {
     "code": "npm run lint-all",
     "lint-all": "eslint src test",
     "lint-staged": "lint-staged",
     "test": "mocha test/specs --require=test/globals.js",
+    "ci": "npm run code && npm test",
     "release": "npm run code && npm test && npm version $VER && npm publish && git push --follow-tags --no-verify",
     "release-patch": "VER=patch npm run release",
     "release-minor": "VER=minor npm run release",
