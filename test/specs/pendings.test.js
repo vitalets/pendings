@@ -16,7 +16,7 @@ describe('pendings', function () {
     it('should call passed fn', function () {
       let a = 0;
       this.pendings.add(() => a++);
-      assert(a === 1);
+      assert.equal(a, 1);
     });
 
     it('should reject in case of error in fn', function () {
@@ -69,7 +69,7 @@ describe('pendings', function () {
     it('should call passed fn', function () {
       let a = 0;
       this.pendings.set(1, () => a++);
-      assert(a === 1);
+      assert.equal(a, 1);
     });
 
     it('should reject in case of error in fn', function () {
@@ -120,4 +120,8 @@ describe('pendings', function () {
     assert.throws(() => this.pendings.fulfill('id123', 123), /Pending promise with id .+ not found/);
   });
 
+  it('should should overwrite generateId method', function () {
+    this.pendings.generateId = () => 1;
+    this.pendings.add(id => assert.equal(id, 1));
+  });
 });

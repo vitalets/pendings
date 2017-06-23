@@ -15,7 +15,7 @@ describe('pending', function () {
   it('should call passed fn', function () {
     let a = 0;
     this.pending.call(() => a++);
-    assert(a === 1);
+    assert.equal(a, 1);
   });
 
   it('should reject in case of error in fn', function () {
