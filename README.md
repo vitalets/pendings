@@ -9,6 +9,11 @@
 *Pendings* provides better control of pending [Promises](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise)
 by automatic managing their `resolve | reject` callbacks.
 
+## Installation
+```bash
+npm install pendings --save
+```
+
 ## Motivation
 Imagine you are devepoling promise-based WebSocket wrapper.
 It has `open()` method that returns `Promise` and resolves when WebSocket `onopen` event comes.
@@ -102,12 +107,6 @@ myWebSocket.send({foo: 'bar'})
   .then(data => console.log('response:', data)); 
 
 ```
-
-## Installation
-```bash
-npm install pendings --save
-```
-
 ## API
 
 * `Pendings` - controls list of pending promises
