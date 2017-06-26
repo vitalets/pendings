@@ -4,10 +4,9 @@
 [![npm](https://img.shields.io/npm/v/pendings.svg)](https://www.npmjs.com/package/pendings)
 [![license](https://img.shields.io/npm/l/pendings.svg)](https://www.npmjs.com/package/pendings)
 
-> Better control of pending promises
+> Better control of pending [Promises](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise)
 
-*Pendings* provides better control of pending [Promises](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise)
-by automatic managing `resolve` / `reject` callbacks.
+*Pendings* is a library for better control of single promise (or list of promises) by providing direct access `resolve` / `reject` callbacks.
 
 ## Installation
 ```bash
