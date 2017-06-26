@@ -96,6 +96,7 @@ class MyClass {
   * `.has(id)` - does promise with specified `id` exist
   * `.resolve(id, value)` - resolves pending promise by `id` with specified `value`
   * `.reject(id, reason)` - rejects pending promise by `id` with specified `reason`
+  * `.rejectAll(reason)` - rejects all pending promises 
   * `.fulfill(id, reason)` - rejects pending promise if `reason` is specified, otherwise resolves with empty value 
   
 * `Pending` - controls single promise

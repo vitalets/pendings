@@ -47,6 +47,10 @@ class Pendings {
     this._get(id).fulfill(error);
   }
 
+  rejectAll(reason) {
+    Object.keys(this._map).forEach(id => this.reject(id, reason));
+  }
+
   generateId() {
     return `${Date.now()}-${Math.random()}`;
   }

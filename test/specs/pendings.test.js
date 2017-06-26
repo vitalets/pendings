@@ -153,4 +153,14 @@ describe('pendings', function () {
   it('should export Pending as prop', function () {
     assert.ok(Pendings.Pending);
   });
+
+  it('should reject all', function () {
+    const p1 = this.pendings.add(() => {});
+    const p2 = this.pendings.set(1, () => {});
+    this.pendings.rejectAll('err');
+    return Promise.all([
+      assert.isRejected(p1, 'err'),
+      assert.isRejected(p2, 'err'),
+    ]);
+  });
 });
