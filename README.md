@@ -230,5 +230,14 @@ Controls single pending promise.
    */
 ```
 
+#### .isFulfilled
+```js
+  /**
+   * Returns is promise fulfilled or not.
+   *
+   * @returns {Boolean}
+   */
+```
+
 ## License
 MIT @ [Vitaliy Potapov](https://github.com/vitalets)

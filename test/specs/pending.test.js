@@ -20,8 +20,8 @@ describe('pending', function () {
 
   it('should allow to call without fn', function () {
     const res = this.pending.call();
-    this.pending.resolve(123);
-    return assert.eventually.equal(res, 123);
+    this.pending.resolve('foo');
+    return assert.eventually.equal(res, 'foo');
   });
 
   it('should reject in case of error in fn', function () {
@@ -37,26 +37,42 @@ describe('pending', function () {
 
   it('should resolve directly', function () {
     const res = this.pending.call(() => {});
-    this.pending.resolve(123);
-    return assert.eventually.equal(res, 123);
+    this.pending.resolve('foo');
+    return assert.eventually.equal(res, 'foo');
   });
 
   it('should fulfill to resolved', function () {
     const res = this.pending.call(() => {});
-    this.pending.fulfill(123);
-    return assert.eventually.equal(res, 123);
+    this.pending.fulfill('foo');
+    return assert.eventually.equal(res, 'foo');
   });
 
   it('should fulfill to rejected with error', function () {
     const res = this.pending.call(() => {});
-    this.pending.fulfill(123, new Error('err'));
+    this.pending.fulfill('foo', new Error('err'));
     return assert.isRejected(res, 'err');
   });
 
   it('should not throw if resolved twice', function () {
     const res = this.pending.call(() => {});
-    this.pending.resolve(123);
-    this.pending.resolve(456);
-    return assert.eventually.equal(res, 123);
+    this.pending.resolve('foo');
+    this.pending.resolve('bar');
+    return assert.eventually.equal(res, 'foo');
+  });
+
+  it('should set isFulfilled after resolve', function () {
+    assert.ok(this.pending.isFulfilled);
+    const res = this.pending.call();
+    assert.notOk(this.pending.isFulfilled);
+    this.pending.resolve('foo');
+    return assert.isFulfilled(res).then(() => assert.ok(this.pending.isFulfilled));
+  });
+
+  it('should set isFulfilled after reject', function () {
+    assert.ok(this.pending.isFulfilled);
+    const res = this.pending.call();
+    assert.notOk(this.pending.isFulfilled);
+    this.pending.reject('foo');
+    return assert.isRejected(res, 'foo');
   });
 });

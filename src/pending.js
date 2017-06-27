@@ -11,6 +11,16 @@ module.exports = class Pending {
   constructor() {
     this._resolve = null;
     this._reject = null;
+    this._isFulfilled = true;
+  }
+
+  /**
+   * Returns is promise fulfilled or not.
+   *
+   * @returns {Boolean}
+   */
+  get isFulfilled() {
+    return this._isFulfilled;
   }
 
   /**
@@ -20,6 +30,7 @@ module.exports = class Pending {
    * @returns {Promise}
    */
   call(fn) {
+    this._isFulfilled = false;
     return new Promise((resolve, reject) => {
       this._resolve = resolve;
       this._reject = reject;
@@ -35,6 +46,7 @@ module.exports = class Pending {
    * @param {*} [value]
    */
   resolve(value) {
+    this._isFulfilled = true;
     this._resolve(value);
   }
 
@@ -44,6 +56,7 @@ module.exports = class Pending {
    * @param {*} [reason]
    */
   reject(reason) {
+    this._isFulfilled = true;
     this._reject(reason);
   }
 
