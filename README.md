@@ -87,23 +87,147 @@ class MyClass {
     }
 }
 ```
+
 ## API
 
-* `Pendings` - controls list of promises
-  * `.add(fn)` - calls `fn` and returns new promise. `fn` gets unique `id` as parameter
-  * `.set(id, fn)` - calls `fn` and returns new promise with specified `id`
-  * `.has(id)` - does promise with specified `id` exist
-  * `.resolve(id, value)` - resolves pending promise by `id` with specified `value`
-  * `.reject(id, reason)` - rejects pending promise by `id` with specified `reason`
-  * `.rejectAll(reason)` - rejects all pending promises 
-  * `.fulfill(id, reason)` - rejects pending promise if `reason` is specified, otherwise resolves with empty value 
+### new Pendings([options])
+Controls list of pending promises.
+```js
+  /**
+   * Constructor.
+   *
+   * @param {Object} [options]
+   * @param {Number} [options.timeout] default timeout
+   */
+```
+
+#### .add(fn, [options])
+```js
+  /**
+   * Calls `fn` and returns new promise. `fn` gets generated unique `id` as parameter.
+   *
+   * @param {Function} fn
+   * @param {Object} [options]
+   * @param {Number} [options.timeout]
+   * @returns {Promise}
+   */
+```
+
+#### .set(id, fn, [options])
+```js
+  /**
+   * Calls `fn` and returns new promise with specified `id`.
+   *
+   * @param {String|Number} id
+   * @param {Function} fn
+   * @param {Object} [options]
+   * @param {Number} [options.timeout]
+   * @returns {Promise}
+   */
+```
+
+#### .has(id)
+```js
+  /**
+   * Checks if pending promise with specified `id` exists.
+   * 
+   * @param {String|Number} id
+   * @returns {Boolean}
+   */
+```
   
-* `Pending` - controls single promise
-  * `.call(fn, timeout = 0)` - calls `fn` and returns new promise. 
-    if `timeout` specified - promise will be rejected after timeout.
-  * `.resolve(value)` - resolves pending promise
-  * `.reject(reason)` - reject pending promise
-  * `.fulfill(reason)` - rejects pending promise if `reason` is specified, otherwise resolves with empty value
+#### .resolve(id, [value])
+```js
+  /**
+   * Resolves pending promise by `id` with specified `value`.
+   *
+   * @param {String|Number} id
+   * @param {*} [value]
+   */
+```
+
+#### .reject(id, [reason])
+```js
+  /**
+   * Rejects pending promise by `id` with specified `reason`.
+   *
+   * @param {String|Number} id
+   * @param {*} [reason]
+   */
+```
+
+#### .rejectAll([reason])
+```js
+  /**
+   * Rejects all pending promises with specified `reason`. Useful for cleanup.
+   *
+   * @param {*} [reason]
+   */
+```
+
+#### .fulfill(id, [reason])
+```js
+  /**
+   * Rejects pending promise if `reason` is specified, otherwise resolves with empty value.
+   *
+   * @param {String|Number} id
+   * @param {*} [reason]
+   */
+```
+
+#### .generateId()
+```js
+  /**
+   * Generates unique ID. Can be overwritten.
+   * 
+   * @returns {String}
+   */
+```
+
+### new Pending()
+Controls single pending promise.
+```js
+  /**
+   * Constructor.
+   */
+```
+
+#### .call(fn)
+```js
+  /**
+   * Calls `fn`, returns new promise and holds `resolve` / `reject` callbacks.
+   *
+   * @param {Function} fn
+   * @returns {Promise}
+   */
+```
+
+#### .resolve([value])
+```js
+  /**
+   * Resolves pending promise with specified `value`.
+   *
+   * @param {*} [value]
+   */
+```
+
+#### .reject([reason])
+```js
+  /**
+   * Rejects pending promise with specified `reason`.
+   *
+   * @param {*} [reason]
+   */
+```
+
+#### .fulfill([reason])
+```js
+  /**
+   * Rejects pending promise if `reason` is specified, otherwise resolves with empty value.
+   *
+   * @param {*} [reason]
+   */
+```
 
 ## License
 MIT @ [Vitaliy Potapov](https://github.com/vitalets)

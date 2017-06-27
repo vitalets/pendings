@@ -1,5 +1,5 @@
 /**
- * Manipulate list of pending promises
+ * Controls list of pending promises.
  */
 
 'use strict';
@@ -7,16 +7,128 @@
 const Pending = require('./pending');
 
 class Pendings {
-  constructor() {
+  /**
+   * Constructor.
+   *
+   * @param {Object} [options]
+   * @param {Number} [options.timeout] default timeout
+   */
+  constructor(options) {
+    options = options || {};
+    this._timeout = options.timeout;
     this._map = Object.create(null);
   }
 
-  add(fn) {
+  /**
+   * Calls `fn` and returns new promise. `fn` gets generated unique `id` as parameter.
+   *
+   * @param {Function} fn
+   * @param {Object} [options]
+   * @param {Number} [options.timeout]
+   * @returns {Promise}
+   */
+  add(fn, options) {
     const id = this.generateId();
-    return this.set(id, fn);
+    return this.set(id, fn, options);
   }
 
-  set(id, fn) {
+  /**
+   * Calls `fn` and returns new promise with specified `id`.
+   *
+   * @param {String|Number} id
+   * @param {Function} fn
+   * @param {Object} [options]
+   * @param {Number} [options.timeout]
+   * @returns {Promise}
+   */
+  set(id, fn, options) {
+    options = options || {};
+    const timeout = options.timeout !== undefined ? options.timeout : this._timeout;
+    const promise = this._createPromise(id, fn);
+    if (timeout) {
+      const timeoutPromise = this._createTimeoutPromise(id, timeout);
+      return Promise.race([promise, timeoutPromise]);
+    } else {
+      return promise;
+    }
+  }
+
+  /**
+   * Checks if pending promise with specified `id` exists.
+   *
+   * @param {String|Number} id
+   * @returns {Boolean}
+   */
+  has(id) {
+    return Boolean(this._map[id]);
+  }
+
+  /**
+   * Resolves pending promise by `id` with specified `value`.
+   *
+   * @param {String|Number} id
+   * @param {*} [value]
+   */
+  resolve(id, value) {
+    const pending = this._get(id);
+    if (pending) {
+      pending.resolve(value);
+    }
+  }
+
+  /**
+   * Rejects pending promise by `id` with specified `reason`.
+   *
+   * @param {String|Number} id
+   * @param {*} [reason]
+   */
+  reject(id, reason) {
+    const pending = this._get(id);
+    if (pending) {
+      pending.reject(reason);
+    }
+  }
+
+  /**
+   * Rejects all pending promises with specified `reason`. Useful for cleanup.
+   *
+   * @param {*} [reason]
+   */
+  rejectAll(reason) {
+    Object.keys(this._map).forEach(id => this.reject(id, reason));
+  }
+
+  /**
+   * Rejects pending promise if `reason` is specified, otherwise resolves with empty value.
+   *
+   * @param {String|Number} id
+   * @param {*} [reason]
+   */
+  fulfill(id, reason) {
+    const pending = this._get(id);
+    if (pending) {
+      pending.fulfill(reason);
+    }
+  }
+
+  /**
+   * Generates unique ID. Can be overwritten.
+   *
+   * @returns {String}
+   */
+  generateId() {
+    return `${Date.now()}-${Math.random()}`;
+  }
+
+  _get(id) {
+    const pending = this._map[id];
+    if (pending) {
+      delete this._map[id];
+      return pending;
+    }
+  }
+
+  _createPromise(id, fn) {
     const pending = new Pending();
     return pending.call(() => {
       if (this._map[id]) {
@@ -31,45 +143,12 @@ class Pendings {
     });
   }
 
-  has(id) {
-    return Boolean(this._map[id]);
-  }
-
-  resolve(id, data) {
-    const pending = this._get(id);
-    if (pending) {
-      pending.resolve(data);
-    }
-  }
-
-  reject(id, reason) {
-    const pending = this._get(id);
-    if (pending) {
-      pending.reject(reason);
-    }
-  }
-
-  fulfill(id, error) {
-    const pending = this._get(id);
-    if (pending) {
-      pending.fulfill(error);
-    }
-  }
-
-  rejectAll(reason) {
-    Object.keys(this._map).forEach(id => this.reject(id, reason));
-  }
-
-  generateId() {
-    return `${Date.now()}-${Math.random()}`;
-  }
-
-  _get(id) {
-    const pending = this._map[id];
-    if (pending) {
-      delete this._map[id];
-      return pending;
-    }
+  _createTimeoutPromise(id, timeout) {
+    return new Promise(resolve => setTimeout(resolve, timeout))
+      .then(() => {
+        const error = new Error(`Promise rejected by timeout (${timeout} ms)`);
+        this.reject(id, error);
+      });
   }
 }
 

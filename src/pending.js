@@ -1,44 +1,60 @@
 /**
- * Pending promise {resolve, reject} holder
+ * Controls single pending promise.
  */
 
 'use strict';
 
 module.exports = class Pending {
+  /**
+   * Constructor.
+   */
   constructor() {
-    this.resolve = null;
-    this.reject = null;
+    this._resolve = null;
+    this._reject = null;
   }
 
-  call(fn, timeout) {
-    timeout = timeout || 0;
-    const promise = this._createPromise(fn);
-    return timeout
-      ? Promise.race([promise, wait(timeout)])
-      : promise;
+  /**
+   * Calls `fn`, returns new promise and holds `resolve` / `reject` callbacks.
+   *
+   * @param {Function} fn
+   * @returns {Promise}
+   */
+  call(fn) {
+    return new Promise((resolve, reject) => {
+      this._resolve = resolve;
+      this._reject = reject;
+      fn();
+    });
   }
 
-  fulfill(error) {
-    if (error) {
-      this.reject(error);
+  /**
+   * Resolves pending promise with specified `value`.
+   *
+   * @param {*} [value]
+   */
+  resolve(value) {
+    this._resolve(value);
+  }
+
+  /**
+   * Rejects pending promise with specified `reason`.
+   *
+   * @param {*} [reason]
+   */
+  reject(reason) {
+    this._reject(reason);
+  }
+
+  /**
+   * Rejects pending promise if `reason` is specified, otherwise resolves with empty value.
+   *
+   * @param {*} [reason]
+   */
+  fulfill(reason) {
+    if (reason) {
+      this.reject(reason);
     } else {
       this.resolve();
     }
   }
-
-  _createPromise(fn) {
-    return new Promise((resolve, reject) => {
-      this.resolve = resolve;
-      this.reject = reject;
-      fn();
-    });
-  }
 };
-
-function wait(ms) {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      reject(new Error(`Rejected by timeout (${ms} ms)`));
-    }, ms);
-  });
-}

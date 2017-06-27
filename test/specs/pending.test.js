@@ -53,20 +53,4 @@ describe('pending', function () {
     this.pending.resolve(456);
     return assert.eventually.equal(res, 123);
   });
-
-  describe('timeout', function () {
-
-    it('should reject after timeout', function () {
-      const res = this.pending.call(() => {}, 10);
-      setTimeout(() => this.pending.resolve(123), 20);
-      return assert.isRejected(res, 'Rejected by timeout (10 ms)');
-    });
-
-    it('should resolve before timeout', function () {
-      const res = this.pending.call(() => {}, 10);
-      setTimeout(() => this.pending.resolve(123), 5);
-      return assert.eventually.equal(res, 123);
-    });
-
-  });
 });
