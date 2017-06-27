@@ -9,7 +9,7 @@ describe('pending', function () {
 
   it('should return Promise', function () {
     const res = this.pending.call(() => {});
-    assert(res instanceof Promise);
+    assert.instanceOf(res, Promise);
   });
 
   it('should call passed fn', function () {
@@ -20,37 +20,53 @@ describe('pending', function () {
 
   it('should reject in case of error in fn', function () {
     const res = this.pending.call(() => {throw new Error('err');});
-    assert.isRejected(res, 'err');
+    return assert.isRejected(res, 'err');
   });
 
   it('should reject directly', function () {
     const res = this.pending.call(() => {});
     this.pending.reject(new Error('err'));
-    assert.isRejected(res, 'err');
+    return assert.isRejected(res, 'err');
   });
 
   it('should resolve directly', function () {
     const res = this.pending.call(() => {});
     this.pending.resolve(123);
-    assert.eventually.equal(res, 123);
+    return assert.eventually.equal(res, 123);
   });
 
   it('should fulfill to resolved', function () {
     const res = this.pending.call(() => {});
     this.pending.fulfill();
-    assert.eventually.equal(res, undefined);
+    return assert.eventually.equal(res, undefined);
   });
 
   it('should fulfill to rejected with error', function () {
     const res = this.pending.call(() => {});
     this.pending.fulfill(new Error('err'));
-    assert.isRejected(res, 'err');
+    return assert.isRejected(res, 'err');
   });
 
   it('should not throw if resolved twice', function () {
     const res = this.pending.call(() => {});
     this.pending.resolve(123);
     this.pending.resolve(456);
-    assert.eventually.equal(res, 123);
+    return assert.eventually.equal(res, 123);
+  });
+
+  describe('timeout', function () {
+
+    it('should reject after timeout', function () {
+      const res = this.pending.call(() => {}, 10);
+      setTimeout(() => this.pending.resolve(123), 20);
+      return assert.isRejected(res, 'Rejected by timeout (10 ms)');
+    });
+
+    it('should resolve before timeout', function () {
+      const res = this.pending.call(() => {}, 10);
+      setTimeout(() => this.pending.resolve(123), 5);
+      return assert.eventually.equal(res, 123);
+    });
+
   });
 });

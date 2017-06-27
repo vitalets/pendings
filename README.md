@@ -99,7 +99,8 @@ class MyClass {
   * `.fulfill(id, reason)` - rejects pending promise if `reason` is specified, otherwise resolves with empty value 
   
 * `Pending` - controls single promise
-  * `.call(fn)` - calls `fn` and returns new promise
+  * `.call(fn, timeout = 0)` - calls `fn` and returns new promise. 
+    if `timeout` specified - promise will be rejected after timeout.
   * `.resolve(value)` - resolves pending promise
   * `.reject(reason)` - reject pending promise
   * `.fulfill(reason)` - rejects pending promise if `reason` is specified, otherwise resolves with empty value
