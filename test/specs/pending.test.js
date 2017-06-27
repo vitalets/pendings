@@ -18,6 +18,12 @@ describe('pending', function () {
     assert.equal(a, 1);
   });
 
+  it('should allow to call without fn', function () {
+    const res = this.pending.call();
+    this.pending.resolve(123);
+    return assert.eventually.equal(res, 123);
+  });
+
   it('should reject in case of error in fn', function () {
     const res = this.pending.call(() => {throw new Error('err');});
     return assert.isRejected(res, 'err');

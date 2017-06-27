@@ -23,7 +23,9 @@ module.exports = class Pending {
     return new Promise((resolve, reject) => {
       this._resolve = resolve;
       this._reject = reject;
-      fn();
+      if (fn) {
+        fn();
+      }
     });
   }
 
