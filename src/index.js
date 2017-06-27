@@ -36,15 +36,24 @@ class Pendings {
   }
 
   resolve(id, data) {
-    this._get(id).resolve(data);
+    const pending = this._get(id);
+    if (pending) {
+      pending.resolve(data);
+    }
   }
 
   reject(id, reason) {
-    this._get(id).reject(reason);
+    const pending = this._get(id);
+    if (pending) {
+      pending.reject(reason);
+    }
   }
 
   fulfill(id, error) {
-    this._get(id).fulfill(error);
+    const pending = this._get(id);
+    if (pending) {
+      pending.fulfill(error);
+    }
   }
 
   rejectAll(reason) {
@@ -57,12 +66,10 @@ class Pendings {
 
   _get(id) {
     const pending = this._map[id];
-    if (!pending) {
-      throw new Error(`Pending promise with id ${id} not found`);
-    } else {
+    if (pending) {
       delete this._map[id];
+      return pending;
     }
-    return pending;
   }
 }
 

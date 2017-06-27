@@ -56,7 +56,7 @@ describe('pendings', function () {
       let id;
       this.pendings.add(pid => id = pid);
       this.pendings.resolve(id, 123);
-      assert.throws(() => this.pendings.resolve(id, 456), /Pending promise with id .+ not found/);
+      assert.notOk(this.pendings.has(id));
     });
   });
 
@@ -104,7 +104,7 @@ describe('pendings', function () {
     it('should delete promise after resolve', function () {
       this.pendings.set(1, () => {});
       this.pendings.resolve(1, 1);
-      assert.throws(() => this.pendings.resolve(1, 456), /Pending promise with id 1 not found/);
+      assert.notOk(this.pendings.has(1));
     });
 
     it('should throw if called with the same id', function () {
@@ -139,10 +139,10 @@ describe('pendings', function () {
     });
   });
 
-  it('should throw for invalid id', function () {
-    assert.throws(() => this.pendings.resolve('id123', 123), /Pending promise with id .+ not found/);
-    assert.throws(() => this.pendings.reject('id123', 123), /Pending promise with id .+ not found/);
-    assert.throws(() => this.pendings.fulfill('id123', 123), /Pending promise with id .+ not found/);
+  it('should not throw for invalid id', function () {
+    assert.doesNotThrow(() => this.pendings.resolve('id123', 123));
+    assert.doesNotThrow(() => this.pendings.reject('id123', 123));
+    assert.doesNotThrow(() => this.pendings.fulfill('id123', 123));
   });
 
   it('should should overwrite generateId method', function () {
