@@ -14,8 +14,7 @@ npm install pendings --save
 ```
 
 ## Example
-In promise-based class sometimes we store `resolve` / `reject` callbacks for future promise fulfillment. 
-E.g.:
+When working with Promises sometimes we need to store `resolve` / `reject` callbacks for future fulfillment: 
 ```js
 class MyClass {
     waitSomeEvent() { 
@@ -36,7 +35,7 @@ class MyClass {
 }
 
 ```
-*Pendings* library allows to simplify it:
+This library allows to reduce boilerplate code:
 
 ```js
 const Pending = require('pendings').Pending;
@@ -59,8 +58,8 @@ class MyClass {
     }
 }
 ```
-Moreover, it is useful for list of pending promises. 
-The unique `id` is generated for each promise and allows to fulfill it: 
+Moreover, it is useful when working with list of pending promises. 
+The unique `id` is generated for each promise and allows to fulfill it later: 
 ```js
 const Pendings = require('pendings');
 
@@ -69,7 +68,7 @@ class MyClass {
         this.pendings = new Pendings();
     }    
 
-    sendDataAndWait(data) { 
+    sendDataAndWaitResponse(data) { 
         return this.pendings.add(id => {
             data.id = id;
             this.send(data);
@@ -90,7 +89,7 @@ class MyClass {
 
 ## API
 
-### new Pendings([options])
+### new Pendings(options)
 Controls list of pending promises.
 ```js
   /**
@@ -101,7 +100,7 @@ Controls list of pending promises.
    */
 ```
 
-#### .add(fn, [options])
+#### .add(fn, options)
 ```js
   /**
    * Calls `fn` and returns new promise. `fn` gets generated unique `id` as parameter.
@@ -113,7 +112,7 @@ Controls list of pending promises.
    */
 ```
 
-#### .set(id, fn, [options])
+#### .set(id, fn, options)
 ```js
   /**
    * Calls `fn` and returns new promise with specified `id`.
@@ -136,7 +135,7 @@ Controls list of pending promises.
    */
 ```
   
-#### .resolve(id, [value])
+#### .resolve(id, value)
 ```js
   /**
    * Resolves pending promise by `id` with specified `value`.
@@ -146,7 +145,7 @@ Controls list of pending promises.
    */
 ```
 
-#### .reject(id, [reason])
+#### .reject(id, reason)
 ```js
   /**
    * Rejects pending promise by `id` with specified `reason`.
@@ -156,7 +155,7 @@ Controls list of pending promises.
    */
 ```
 
-#### .rejectAll([reason])
+#### .rejectAll(reason)
 ```js
   /**
    * Rejects all pending promises with specified `reason`. Useful for cleanup.
@@ -165,12 +164,13 @@ Controls list of pending promises.
    */
 ```
 
-#### .fulfill(id, [reason])
+#### .fulfill(id, value, reason)
 ```js
   /**
-   * Rejects pending promise if `reason` is specified, otherwise resolves with empty value.
+   * Rejects if `reason` is truthy, otherwise resolves with `value`.
    *
    * @param {String|Number} id
+   * @param {*} [value]
    * @param {*} [reason]
    */
 ```
@@ -202,7 +202,7 @@ Controls single pending promise.
    */
 ```
 
-#### .resolve([value])
+#### .resolve(value)
 ```js
   /**
    * Resolves pending promise with specified `value`.
@@ -211,7 +211,7 @@ Controls single pending promise.
    */
 ```
 
-#### .reject([reason])
+#### .reject(reason)
 ```js
   /**
    * Rejects pending promise with specified `reason`.
@@ -220,11 +220,12 @@ Controls single pending promise.
    */
 ```
 
-#### .fulfill([reason])
+#### .fulfill(value, reason)
 ```js
   /**
-   * Rejects pending promise if `reason` is specified, otherwise resolves with empty value.
+   * Rejects if `reason` is truthy, otherwise resolves with `value`.
    *
+   * @param {*} [value]
    * @param {*} [reason]
    */
 ```

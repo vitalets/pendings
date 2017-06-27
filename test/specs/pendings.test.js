@@ -27,8 +27,8 @@ describe('pendings', function () {
     it('should resolve directly', function () {
       let id;
       const res = this.pendings.add(pid => id = pid);
-      this.pendings.resolve(id, 123);
-      return assert.eventually.equal(res, 123);
+      this.pendings.resolve(id, 'foo');
+      return assert.eventually.equal(res, 'foo');
     });
 
     it('should reject directly', function () {
@@ -41,35 +41,35 @@ describe('pendings', function () {
     it('should fulfill to resolved', function () {
       let id;
       const res = this.pendings.add(pid => id = pid);
-      this.pendings.fulfill(id);
-      return assert.eventually.equal(res, undefined);
+      this.pendings.fulfill(id, 'foo');
+      return assert.eventually.equal(res, 'foo');
     });
 
     it('should fulfill to rejected with error', function () {
       let id;
       const res = this.pendings.add(pid => id = pid);
-      this.pendings.fulfill(id, new Error('err'));
+      this.pendings.fulfill(id, 'foo', new Error('err'));
       return assert.isRejected(res, 'err');
     });
 
     it('should delete promise after resolve', function () {
       let id;
       this.pendings.add(pid => id = pid);
-      this.pendings.resolve(id, 123);
+      this.pendings.resolve(id, 'foo');
       assert.notOk(this.pendings.has(id));
     });
 
     it('should resolve before timeout', function () {
       let id;
       const res = this.pendings.add(pid => id = pid, {timeout: 10});
-      setTimeout(() => this.pendings.resolve(id, 123), 5);
-      return assert.eventually.equal(res, 123);
+      setTimeout(() => this.pendings.resolve(id, 'foo'), 5);
+      return assert.eventually.equal(res, 'foo');
     });
 
     it('should reject after timeout', function () {
       let id;
       const res = this.pendings.add(pid => id = pid, {timeout: 10});
-      setTimeout(() => this.pendings.resolve(id, 123), 20);
+      setTimeout(() => this.pendings.resolve(id, 'foo'), 20);
       return assert.isRejected(res, 'Promise rejected by timeout (10 ms)');
     });
   });
@@ -99,19 +99,19 @@ describe('pendings', function () {
 
     it('should resolve directly', function () {
       const res = this.pendings.set(1, () => {});
-      this.pendings.resolve(1, 123);
-      return assert.eventually.equal(res, 123);
+      this.pendings.resolve(1, 'foo');
+      return assert.eventually.equal(res, 'foo');
     });
 
     it('should fulfill to resolved', function () {
       const res = this.pendings.set(1, () => {});
-      this.pendings.fulfill(1);
-      return assert.eventually.equal(res, undefined);
+      this.pendings.fulfill(1, 'foo');
+      return assert.eventually.equal(res, 'foo');
     });
 
     it('should fulfill to rejected with error', function () {
       const res = this.pendings.set(1, () => {});
-      this.pendings.fulfill(1, new Error('err'));
+      this.pendings.fulfill(1, 'foo', new Error('err'));
       return assert.isRejected(res, 'err');
     });
 
@@ -129,27 +129,27 @@ describe('pendings', function () {
 
     it('should resolve before timeout', function () {
       const res = this.pendings.set(1, () => {}, {timeout: 10});
-      setTimeout(() => this.pendings.resolve(1, 123), 5);
-      return assert.eventually.equal(res, 123);
+      setTimeout(() => this.pendings.resolve(1, 'foo'), 5);
+      return assert.eventually.equal(res, 'foo');
     });
 
     it('should reject after timeout', function () {
       const res = this.pendings.set(1, () => {}, {timeout: 10});
-      setTimeout(() => this.pendings.resolve(1, 123), 20);
+      setTimeout(() => this.pendings.resolve(1, 'foo'), 20);
       return assert.isRejected(res, 'Promise rejected by timeout (10 ms)');
     });
 
     it('should reject after default timeout', function () {
       const pendings = new Pendings({timeout: 10});
       const res = pendings.set(1, () => {});
-      setTimeout(() => pendings.resolve(1, 123), 20);
+      setTimeout(() => pendings.resolve(1, 'foo'), 20);
       return assert.isRejected(res, 'Promise rejected by timeout (10 ms)');
     });
 
     it('should overwrite default timeout', function () {
       const pendings = new Pendings({timeout: 20});
       const res = pendings.set(1, () => {}, {timeout: 10});
-      setTimeout(() => pendings.resolve(1, 123), 15);
+      setTimeout(() => pendings.resolve(1, 'foo'), 15);
       return assert.isRejected(res, 'Promise rejected by timeout (10 ms)');
     });
   });
@@ -179,9 +179,9 @@ describe('pendings', function () {
   });
 
   it('should not throw for invalid id', function () {
-    assert.doesNotThrow(() => this.pendings.resolve('id123', 123));
-    assert.doesNotThrow(() => this.pendings.reject('id123', 123));
-    assert.doesNotThrow(() => this.pendings.fulfill('id123', 123));
+    assert.doesNotThrow(() => this.pendings.resolve('id123', 'foo'));
+    assert.doesNotThrow(() => this.pendings.reject(123, 'foo'));
+    assert.doesNotThrow(() => this.pendings.fulfill('id123', 'foo'));
   });
 
   it('should should overwrite generateId method', function () {

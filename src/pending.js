@@ -46,15 +46,16 @@ module.exports = class Pending {
   }
 
   /**
-   * Rejects pending promise if `reason` is specified, otherwise resolves with empty value.
+   * Rejects if `reason` is truthy, otherwise resolves with `value`.
    *
+   * @param {*} [value]
    * @param {*} [reason]
    */
-  fulfill(reason) {
+  fulfill(value, reason) {
     if (reason) {
       this.reject(reason);
     } else {
-      this.resolve();
+      this.resolve(value);
     }
   }
 };

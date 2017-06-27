@@ -99,15 +99,16 @@ class Pendings {
   }
 
   /**
-   * Rejects pending promise if `reason` is specified, otherwise resolves with empty value.
+   * Rejects if `reason` is truthy, otherwise resolves with `value`.
    *
    * @param {String|Number} id
+   * @param {*} [value]
    * @param {*} [reason]
    */
-  fulfill(id, reason) {
+  fulfill(id, value, reason) {
     const pending = this._get(id);
     if (pending) {
-      pending.fulfill(reason);
+      pending.fulfill(value, reason);
     }
   }
 

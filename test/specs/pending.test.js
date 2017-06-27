@@ -37,13 +37,13 @@ describe('pending', function () {
 
   it('should fulfill to resolved', function () {
     const res = this.pending.call(() => {});
-    this.pending.fulfill();
-    return assert.eventually.equal(res, undefined);
+    this.pending.fulfill(123);
+    return assert.eventually.equal(res, 123);
   });
 
   it('should fulfill to rejected with error', function () {
     const res = this.pending.call(() => {});
-    this.pending.fulfill(new Error('err'));
+    this.pending.fulfill(123, new Error('err'));
     return assert.isRejected(res, 'err');
   });
 
