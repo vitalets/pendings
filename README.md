@@ -35,7 +35,7 @@ class MyClass {
 }
 
 ```
-This library allows to reduce boilerplate code:
+This library allows to reduce boilerplate code by automatically storing `resolve` / `reject` callbacks:
 
 ```js
 const Pending = require('pendings').Pending;
