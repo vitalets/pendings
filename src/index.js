@@ -11,7 +11,7 @@ class Pendings {
    * Constructor.
    *
    * @param {Object} [options]
-   * @param {Number} [options.timeout] default timeout
+   * @param {Number} [options.timeout] default timeout for all promises
    */
   constructor(options) {
     options = options || {};
@@ -24,7 +24,7 @@ class Pendings {
    *
    * @param {Function} fn
    * @param {Object} [options]
-   * @param {Number} [options.timeout]
+   * @param {Number} [options.timeout] custom timeout for particular promise
    * @returns {Promise}
    */
   add(fn, options) {
@@ -38,7 +38,7 @@ class Pendings {
    * @param {String|Number} id
    * @param {Function} fn
    * @param {Object} [options]
-   * @param {Number} [options.timeout]
+   * @param {Number} [options.timeout] custom timeout for particular promise
    * @returns {Promise}
    */
   set(id, fn, options) {
