@@ -55,5 +55,8 @@
     "promise-wrapper",
     "promise-api"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "promise.prototype.finally": "^2.0.1"
+  }
 }

@@ -208,6 +208,7 @@ Controls single pending promise.
    * Calls `fn`, returns new promise and holds `resolve` / `reject` callbacks.
    *
    * @param {Function} fn
+   * @param {Number} [timeout=0]
    * @returns {Promise}
    */
 ```

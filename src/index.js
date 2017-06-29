@@ -4,6 +4,7 @@
 
 'use strict';
 
+const promiseFinally = require('promise.prototype.finally');
 const Pending = require('./pending');
 
 class Pendings {
@@ -42,12 +43,13 @@ class Pendings {
    * @returns {Promise}
    */
   set(id, fn, options) {
-    options = options || {};
-    const timeout = options.timeout !== undefined ? options.timeout : this._timeout;
-    const mainPromise = this._createPromise(id, fn);
-    const finalPromise = timeout ? this._wrapWithTimeout(mainPromise, id, timeout) : mainPromise;
-    this._setPromise(id, finalPromise);
-    return finalPromise;
+    if (!this.has(id)) {
+      const pending = this._map[id] = new Pending();
+      const timeout = this._getTimeout(options);
+      const promise = pending.call(() => fn(id), timeout);
+      pending.finalPromise = promiseFinally(promise, () => delete this._map[id]);
+    }
+    return this.getPromise(id);
   }
 
   /**
@@ -67,7 +69,7 @@ class Pendings {
    * @param {*} [value]
    */
   resolve(id, value) {
-    const pending = this._extract(id);
+    const pending = this._map[id];
     if (pending) {
       pending.resolve(value);
     }
@@ -80,7 +82,7 @@ class Pendings {
    * @param {*} [reason]
    */
   reject(id, reason) {
-    const pending = this._extract(id);
+    const pending = this._map[id];
     if (pending) {
       pending.reject(reason);
     }
@@ -103,7 +105,7 @@ class Pendings {
    * @param {*} [reason]
    */
   fulfill(id, value, reason) {
-    const pending = this._extract(id);
+    const pending = this._map[id];
     if (pending) {
       pending.fulfill(value, reason);
     }
@@ -128,46 +130,9 @@ class Pendings {
     return `${Date.now()}-${Math.random()}`;
   }
 
-  _extract(id) {
-    const pending = this._map[id];
-    if (pending) {
-      delete this._map[id];
-      return pending;
-    }
-  }
-
-  _createPromise(id, fn) {
-    const pending = new Pending();
-    return pending.call(() => {
-      if (this._map[id]) {
-        throw new Error(`Promise with id ${id} is already pending`);
-      }
-      this._map[id] = pending;
-      try {
-        fn(id);
-      } catch (e) {
-        this.reject(id, e);
-      }
-    });
-  }
-
-  _createTimeoutPromise(id, timeout) {
-    return new Promise(resolve => setTimeout(resolve, timeout))
-      .then(() => {
-        const error = new Error(`Promise rejected by timeout (${timeout} ms)`);
-        this.reject(id, error);
-      });
-  }
-
-  _wrapWithTimeout(promise, id, timeout) {
-    const timeoutPromise = this._createTimeoutPromise(id, timeout);
-    return Promise.race([promise, timeoutPromise]);
-  }
-
-  _setPromise(id, promise) {
-    if (this._map[id]) {
-      this._map[id].finalPromise = promise;
-    }
+  _getTimeout(options) {
+    options = options || {};
+    return options.timeout !== undefined ? options.timeout : this._timeout;
   }
 }
 

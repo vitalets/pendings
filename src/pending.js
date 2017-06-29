@@ -4,6 +4,8 @@
 
 'use strict';
 
+const promiseFinally = require('promise.prototype.finally');
+
 module.exports = class Pending {
   /**
    * Constructor.
@@ -37,17 +39,16 @@ module.exports = class Pending {
    * Calls `fn`, returns new promise and holds `resolve` / `reject` callbacks.
    *
    * @param {Function} fn
+   * @param {Number} [timeout=0]
    * @returns {Promise}
    */
-  call(fn) {
+  call(fn, timeout) {
     this._isFulfilled = false;
-    this._promise = new Promise((resolve, reject) => {
-      this._resolve = resolve;
-      this._reject = reject;
-      if (fn) {
-        fn();
-      }
-    });
+    this._createPromise(fn);
+    if (timeout) {
+      this._wrapWithTimeout(timeout);
+    }
+    this._wrapWithFinally();
     return this._promise;
   }
 
@@ -57,7 +58,6 @@ module.exports = class Pending {
    * @param {*} [value]
    */
   resolve(value) {
-    this._isFulfilled = true;
     this._resolve(value);
   }
 
@@ -67,7 +67,6 @@ module.exports = class Pending {
    * @param {*} [reason]
    */
   reject(reason) {
-    this._isFulfilled = true;
     this._reject(reason);
   }
 
@@ -83,5 +82,26 @@ module.exports = class Pending {
     } else {
       this.resolve(value);
     }
+  }
+
+  _createPromise(fn) {
+    this._promise = new Promise((resolve, reject) => {
+      this._resolve = resolve;
+      this._reject = reject;
+      if (fn) {
+        fn();
+      }
+    });
+  }
+
+  _wrapWithTimeout(timeout) {
+    const timeoutPromise = new Promise((resolve, reject) => setTimeout(() => {
+      reject(new Error(`Promise rejected by timeout (${timeout} ms)`));
+    }, timeout));
+    this._promise = Promise.race([this._promise, timeoutPromise]);
+  }
+
+  _wrapWithFinally() {
+    this._promise = promiseFinally(this._promise, () => this._isFulfilled = true);
   }
 };

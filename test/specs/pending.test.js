@@ -81,4 +81,24 @@ describe('pending', function () {
     this.pending.reject('foo');
     return assert.isRejected(res, 'foo');
   });
+
+  it('should set isFulfilled after reject (by error in fn)', function () {
+    assert.ok(this.pending.isFulfilled);
+    const res = this.pending.call(() => { throw new Error('err'); });
+    assert.notOk(this.pending.isFulfilled);
+    return assert.isRejected(res, 'err')
+      .then(() => assert.ok(this.pending.isFulfilled));
+  });
+
+  it('should resolve before timeout', function () {
+    const res = this.pending.call(() => {}, 10);
+    setTimeout(() => this.pending.resolve('foo'), 5);
+    return assert.eventually.equal(res, 'foo');
+  });
+
+  it('should reject after timeout', function () {
+    const res = this.pending.call(() => {}, 10);
+    setTimeout(() => this.pending.resolve('foo'), 20);
+    return assert.isRejected(res, 'Promise rejected by timeout (10 ms)');
+  });
 });

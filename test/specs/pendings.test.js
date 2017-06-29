@@ -54,9 +54,10 @@ describe('pendings', function () {
 
     it('should delete promise after resolve', function () {
       let id;
-      this.pendings.add(pid => id = pid);
+      const p = this.pendings.add(pid => id = pid);
       this.pendings.resolve(id, 'foo');
-      assert.notOk(this.pendings.has(id));
+      return assert.isFulfilled(p)
+        .then(() => assert.notOk(this.pendings.has(id)));
     });
 
     it('should resolve before timeout', function () {
@@ -116,15 +117,16 @@ describe('pendings', function () {
     });
 
     it('should delete promise after resolve', function () {
-      this.pendings.set(1, () => {});
+      const p = this.pendings.set(1, () => {});
       this.pendings.resolve(1, 1);
-      assert.notOk(this.pendings.has(1));
+      return assert.isFulfilled(p)
+        .then(() => assert.notOk(this.pendings.has(1)));
     });
 
-    it('should throw if called with the same id', function () {
-      this.pendings.set(1, () => {});
-      const res = this.pendings.set(1, () => {});
-      return assert.isRejected(res, 'Promise with id 1 is already pending');
+    it('should return the same promise for second call with the same id', function () {
+      const p1 = this.pendings.set(1, () => {});
+      const p2 = this.pendings.set(1, () => {});
+      assert.equal(p1, p2);
     });
 
     it('should resolve before timeout', function () {
@@ -165,16 +167,17 @@ describe('pendings', function () {
     });
 
     it('should return false for resolved promise', function () {
-      this.pendings.set(1, () => {});
+      const p = this.pendings.set(1, () => {});
       this.pendings.resolve(1);
-      assert.notOk(this.pendings.has(1));
+      return assert.isFulfilled(p)
+        .then(() => assert.notOk(this.pendings.has(1)));
     });
 
     it('should return false for rejected promise', function () {
-      const res = this.pendings.set(1, () => {});
+      const p = this.pendings.set(1, () => {});
       this.pendings.reject(1);
-      assert.notOk(this.pendings.has(1));
-      return assert.isRejected(res);
+      return assert.isRejected(p)
+        .then(() => assert.notOk(this.pendings.has(1)));
     });
   });
 
