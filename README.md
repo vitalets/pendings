@@ -175,6 +175,16 @@ Controls list of pending promises.
    */
 ```
 
+#### .getPromise(id)
+```js
+  /**
+   * Returns promise of pending object with specified `id`.
+   *
+   * @param {String|Number} id
+   * @returns {Promise|undefined}
+   */
+```
+
 #### .generateId()
 ```js
   /**

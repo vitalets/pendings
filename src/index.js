@@ -70,7 +70,7 @@ class Pendings {
    * @param {*} [value]
    */
   resolve(id, value) {
-    const pending = this._get(id);
+    const pending = this._extract(id);
     if (pending) {
       pending.resolve(value);
     }
@@ -83,7 +83,7 @@ class Pendings {
    * @param {*} [reason]
    */
   reject(id, reason) {
-    const pending = this._get(id);
+    const pending = this._extract(id);
     if (pending) {
       pending.reject(reason);
     }
@@ -106,10 +106,20 @@ class Pendings {
    * @param {*} [reason]
    */
   fulfill(id, value, reason) {
-    const pending = this._get(id);
+    const pending = this._extract(id);
     if (pending) {
       pending.fulfill(value, reason);
     }
+  }
+
+  /**
+   * Returns promise of pending object with specified `id`.
+   *
+   * @param {String|Number} id
+   * @returns {Promise|undefined}
+   */
+  getPromise(id) {
+    return this._map[id] && this._map[id].promise;
   }
 
   /**
@@ -121,7 +131,7 @@ class Pendings {
     return `${Date.now()}-${Math.random()}`;
   }
 
-  _get(id) {
+  _extract(id) {
     const pending = this._map[id];
     if (pending) {
       delete this._map[id];

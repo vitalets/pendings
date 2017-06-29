@@ -178,6 +178,17 @@ describe('pendings', function () {
     });
   });
 
+  describe('getPromise', function () {
+    it('should return promise of existing pending', function () {
+      const p = this.pendings.set(1, () => {});
+      assert.equal(p, this.pendings.getPromise(1));
+    });
+
+    it('should return undefined for non-existing pending', function () {
+      assert.equal(this.pendings.getPromise(1));
+    });
+  });
+
   it('should not throw for invalid id', function () {
     assert.doesNotThrow(() => this.pendings.resolve('id123', 'foo'));
     assert.doesNotThrow(() => this.pendings.reject(123, 'foo'));
