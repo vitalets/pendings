@@ -6,7 +6,7 @@
 
 > Better control of pending [Promises](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise)
 
-*Pendings* is a library for better control of single promise (or list of promises) by providing direct access `resolve` / `reject` callbacks.
+*Pendings* is a library for advanced control of single promise (or list of promises) by providing direct access `resolve` / `reject` callbacks.
 
 ## Installation
 ```bash
