@@ -239,5 +239,14 @@ Controls single pending promise.
    */
 ```
 
+#### .promise
+```js
+  /**
+   * Returns promise itself.
+   *
+   * @returns {Promise}
+   */
+```
+
 ## License
 MIT @ [Vitaliy Potapov](https://github.com/vitalets)

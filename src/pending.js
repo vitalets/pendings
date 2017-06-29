@@ -12,6 +12,16 @@ module.exports = class Pending {
     this._resolve = null;
     this._reject = null;
     this._isFulfilled = true;
+    this._promise = null;
+  }
+
+  /**
+   * Returns promise itself.
+   *
+   * @returns {Promise}
+   */
+  get promise() {
+    return this._promise;
   }
 
   /**
@@ -31,13 +41,14 @@ module.exports = class Pending {
    */
   call(fn) {
     this._isFulfilled = false;
-    return new Promise((resolve, reject) => {
+    this._promise = new Promise((resolve, reject) => {
       this._resolve = resolve;
       this._reject = reject;
       if (fn) {
         fn();
       }
     });
+    return this._promise;
   }
 
   /**

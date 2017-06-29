@@ -12,6 +12,12 @@ describe('pending', function () {
     assert.instanceOf(res, Promise);
   });
 
+  it('should store Promise', function () {
+    const res = this.pending.call(() => {});
+    assert.instanceOf(this.pending.promise, Promise);
+    assert.equal(res, this.pending.promise);
+  });
+
   it('should call passed fn', function () {
     let a = 0;
     this.pending.call(() => a++);
