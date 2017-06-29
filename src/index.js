@@ -44,13 +44,10 @@ class Pendings {
   set(id, fn, options) {
     options = options || {};
     const timeout = options.timeout !== undefined ? options.timeout : this._timeout;
-    const promise = this._createPromise(id, fn);
-    if (timeout) {
-      const timeoutPromise = this._createTimeoutPromise(id, timeout);
-      return Promise.race([promise, timeoutPromise]);
-    } else {
-      return promise;
-    }
+    const mainPromise = this._createPromise(id, fn);
+    const finalPromise = timeout ? this._wrapWithTimeout(mainPromise, id, timeout) : mainPromise;
+    this._setPromise(id, finalPromise);
+    return finalPromise;
   }
 
   /**
@@ -119,7 +116,7 @@ class Pendings {
    * @returns {Promise|undefined}
    */
   getPromise(id) {
-    return this._map[id] && this._map[id].promise;
+    return this._map[id] && this._map[id].finalPromise;
   }
 
   /**
@@ -160,6 +157,17 @@ class Pendings {
         const error = new Error(`Promise rejected by timeout (${timeout} ms)`);
         this.reject(id, error);
       });
+  }
+
+  _wrapWithTimeout(promise, id, timeout) {
+    const timeoutPromise = this._createTimeoutPromise(id, timeout);
+    return Promise.race([promise, timeoutPromise]);
+  }
+
+  _setPromise(id, promise) {
+    if (this._map[id]) {
+      this._map[id].finalPromise = promise;
+    }
   }
 }
 

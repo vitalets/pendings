@@ -184,6 +184,12 @@ describe('pendings', function () {
       assert.equal(p, this.pendings.getPromise(1));
     });
 
+    it('should return promise of timeouted pending', function () {
+      const p = this.pendings.set(1, () => {}, {timeout: 10});
+      assert.equal(p, this.pendings.getPromise(1));
+      return assert.isRejected(p);
+    });
+
     it('should return undefined for non-existing pending', function () {
       assert.equal(this.pendings.getPromise(1));
     });
