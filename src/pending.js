@@ -6,7 +6,7 @@
 
 const promiseFinally = require('promise.prototype.finally');
 
-module.exports = class Pending {
+class Pending {
   /**
    * Constructor.
    */
@@ -104,4 +104,6 @@ module.exports = class Pending {
   _wrapWithFinally() {
     this._promise = promiseFinally(this._promise, () => this._isFulfilled = true);
   }
-};
+}
+
+module.exports = Pending;
