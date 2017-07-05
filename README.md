@@ -154,7 +154,7 @@ Calls `fn` and returns new promise with specified `id`.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| id | <code>String</code> \| <code>Number</code> |  |
+| id | <code>String</code> |  |
 | fn | <code>function</code> |  |
 | [options] | <code>Object</code> |  |
 | [options.timeout] | <code>Number</code> | custom timeout for particular promise |
@@ -168,7 +168,7 @@ Checks if pending promise with specified `id` exists.
 
 | Param | Type |
 | --- | --- |
-| id | <code>String</code> \| <code>Number</code> | 
+| id | <code>String</code> | 
 
 <a name="Pendings+resolve"></a>
 
@@ -180,7 +180,7 @@ Throws if promise does not exist.
 
 | Param | Type |
 | --- | --- |
-| id | <code>String</code> \| <code>Number</code> | 
+| id | <code>String</code> | 
 | [value] | <code>\*</code> | 
 
 <a name="Pendings+reject"></a>
@@ -193,7 +193,7 @@ Throws if promise does not exist.
 
 | Param | Type |
 | --- | --- |
-| id | <code>String</code> \| <code>Number</code> | 
+| id | <code>String</code> | 
 | [reason] | <code>\*</code> | 
 
 <a name="Pendings+fulfill"></a>
@@ -206,7 +206,7 @@ Throws if promise does not exist.
 
 | Param | Type |
 | --- | --- |
-| id | <code>String</code> \| <code>Number</code> | 
+| id | <code>String</code> | 
 | [value] | <code>\*</code> | 
 | [reason] | <code>\*</code> | 
 
@@ -219,7 +219,7 @@ Resolves pending promise by `id` with specified `value` if it exists.
 
 | Param | Type |
 | --- | --- |
-| id | <code>String</code> \| <code>Number</code> | 
+| id | <code>String</code> | 
 | [value] | <code>\*</code> | 
 
 <a name="Pendings+tryReject"></a>
@@ -231,7 +231,7 @@ Rejects pending promise by `id` with specified `reason` if it exists.
 
 | Param | Type |
 | --- | --- |
-| id | <code>String</code> \| <code>Number</code> | 
+| id | <code>String</code> | 
 | [reason] | <code>\*</code> | 
 
 <a name="Pendings+tryFulfill"></a>
@@ -243,7 +243,7 @@ Rejects pending promise by `id` if `reason` is truthy, otherwise resolves with `
 
 | Param | Type |
 | --- | --- |
-| id | <code>String</code> \| <code>Number</code> | 
+| id | <code>String</code> | 
 | [value] | <code>\*</code> | 
 | [reason] | <code>\*</code> | 
 
@@ -267,7 +267,7 @@ Returns promise of pending object with specified `id`.
 
 | Param | Type |
 | --- | --- |
-| id | <code>String</code> \| <code>Number</code> | 
+| id | <code>String</code> | 
 
 <a name="Pendings+generateId"></a>
 

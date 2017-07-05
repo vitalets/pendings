@@ -38,7 +38,7 @@ class Pendings {
   /**
    * Calls `fn` and returns new promise with specified `id`.
    *
-   * @param {String|Number} id
+   * @param {String} id
    * @param {Function} fn
    * @param {Object} [options]
    * @param {Number} [options.timeout] custom timeout for particular promise
@@ -57,7 +57,7 @@ class Pendings {
   /**
    * Checks if pending promise with specified `id` exists.
    *
-   * @param {String|Number} id
+   * @param {String} id
    * @returns {Boolean}
    */
   has(id) {
@@ -68,7 +68,7 @@ class Pendings {
    * Resolves pending promise by `id` with specified `value`.
    * Throws if promise does not exist.
    *
-   * @param {String|Number} id
+   * @param {String} id
    * @param {*} [value]
    */
   resolve(id, value) {
@@ -80,7 +80,7 @@ class Pendings {
    * Rejects pending promise by `id` with specified `reason`.
    * Throws if promise does not exist.
    *
-   * @param {String|Number} id
+   * @param {String} id
    * @param {*} [reason]
    */
   reject(id, reason) {
@@ -92,7 +92,7 @@ class Pendings {
    * Rejects pending promise by `id` if `reason` is truthy, otherwise resolves with `value`.
    * Throws if promise does not exist.
    *
-   * @param {String|Number} id
+   * @param {String} id
    * @param {*} [value]
    * @param {*} [reason]
    */
@@ -104,7 +104,7 @@ class Pendings {
   /**
    * Resolves pending promise by `id` with specified `value` if it exists.
    *
-   * @param {String|Number} id
+   * @param {String} id
    * @param {*} [value]
    */
   tryResolve(id, value) {
@@ -117,7 +117,7 @@ class Pendings {
   /**
    * Rejects pending promise by `id` with specified `reason` if it exists.
    *
-   * @param {String|Number} id
+   * @param {String} id
    * @param {*} [reason]
    */
   tryReject(id, reason) {
@@ -130,7 +130,7 @@ class Pendings {
   /**
    * Rejects pending promise by `id` if `reason` is truthy, otherwise resolves with `value`.
    *
-   * @param {String|Number} id
+   * @param {String} id
    * @param {*} [value]
    * @param {*} [reason]
    */
@@ -153,7 +153,7 @@ class Pendings {
   /**
    * Returns promise of pending object with specified `id`.
    *
-   * @param {String|Number} id
+   * @param {String} id
    * @returns {Promise|undefined}
    */
   getPromise(id) {
