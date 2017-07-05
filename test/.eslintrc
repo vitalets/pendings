@@ -4,7 +4,8 @@
   },
 
   "globals": {
-    "assert": false
+    "assert": false,
+    "srcPath": false
   },
 
   "rules": {

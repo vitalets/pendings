@@ -6,3 +6,4 @@ const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 
 global.assert = chai.assert;
+global.srcPath = process.env.TEST_LIB ? '../../lib' : '../../src';

@@ -1,6 +1,6 @@
 'use strict';
 
-const Pendings = require('../../src/index');
+const Pendings = require(`${srcPath}/index`);
 
 const noop = () => {};
 

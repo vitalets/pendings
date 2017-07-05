@@ -1,6 +1,6 @@
 'use strict';
 
-const Pending = require('../../src/pending');
+const Pending = require(`${srcPath}/pending`);
 
 describe('pending', function () {
   beforeEach(function () {
