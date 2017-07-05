@@ -64,27 +64,78 @@ class Pendings {
 
   /**
    * Resolves pending promise by `id` with specified `value`.
+   * Throws if promise does not exist.
    *
    * @param {String|Number} id
    * @param {*} [value]
    */
   resolve(id, value) {
-    const pending = this._map[id];
+    const pending = this._get(id, {throws: true});
+    pending.resolve(value);
+  }
+
+  /**
+   * Rejects pending promise by `id` with specified `reason`.
+   * Throws if promise does not exist.
+   *
+   * @param {String|Number} id
+   * @param {*} [reason]
+   */
+  reject(id, reason) {
+    const pending = this._get(id, {throws: true});
+    pending.reject(reason);
+  }
+
+  /**
+   * Rejects pending promise by `id` if `reason` is truthy, otherwise resolves with `value`.
+   * Throws if promise does not exist.
+   *
+   * @param {String|Number} id
+   * @param {*} [value]
+   * @param {*} [reason]
+   */
+  fulfill(id, value, reason) {
+    const pending = this._get(id, {throws: true});
+    pending.fulfill(value, reason);
+  }
+
+  /**
+   * Resolves pending promise by `id` with specified `value` if it exists.
+   *
+   * @param {String|Number} id
+   * @param {*} [value]
+   */
+  tryResolve(id, value) {
+    const pending = this._get(id, {throws: false});
     if (pending) {
       pending.resolve(value);
     }
   }
 
   /**
-   * Rejects pending promise by `id` with specified `reason`.
+   * Rejects pending promise by `id` with specified `reason` if it exists.
    *
    * @param {String|Number} id
    * @param {*} [reason]
    */
-  reject(id, reason) {
-    const pending = this._map[id];
+  tryReject(id, reason) {
+    const pending = this._get(id, {throws: false});
     if (pending) {
       pending.reject(reason);
+    }
+  }
+
+  /**
+   * Rejects pending promise by `id` if `reason` is truthy, otherwise resolves with `value`.
+   *
+   * @param {String|Number} id
+   * @param {*} [value]
+   * @param {*} [reason]
+   */
+  tryFulfill(id, value, reason) {
+    const pending = this._get(id, {throws: false});
+    if (pending) {
+      pending.fulfill(value, reason);
     }
   }
 
@@ -95,20 +146,6 @@ class Pendings {
    */
   rejectAll(reason) {
     Object.keys(this._map).forEach(id => this.reject(id, reason));
-  }
-
-  /**
-   * Rejects if `reason` is truthy, otherwise resolves with `value`.
-   *
-   * @param {String|Number} id
-   * @param {*} [value]
-   * @param {*} [reason]
-   */
-  fulfill(id, value, reason) {
-    const pending = this._map[id];
-    if (pending) {
-      pending.fulfill(value, reason);
-    }
   }
 
   /**
@@ -128,6 +165,15 @@ class Pendings {
    */
   generateId() {
     return `${Date.now()}-${Math.random()}`;
+  }
+
+  _get(id, {throws}) {
+    const pending = this._map[id];
+    if (!pending && throws) {
+      throw new Error(`Pending promise not found with id: ${id}`);
+    } else {
+      return pending;
+    }
   }
 
   _getTimeout(options) {
