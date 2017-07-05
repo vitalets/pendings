@@ -110,8 +110,11 @@ class MyClass {
     * [.has(id)](#Pendings+has) ⇒ <code>Boolean</code>
     * [.resolve(id, [value])](#Pendings+resolve)
     * [.reject(id, [reason])](#Pendings+reject)
-    * [.rejectAll([reason])](#Pendings+rejectAll)
     * [.fulfill(id, [value], [reason])](#Pendings+fulfill)
+    * [.tryResolve(id, [value])](#Pendings+tryResolve)
+    * [.tryReject(id, [reason])](#Pendings+tryReject)
+    * [.tryFulfill(id, [value], [reason])](#Pendings+tryFulfill)
+    * [.rejectAll([reason])](#Pendings+rejectAll)
     * [.getPromise(id)](#Pendings+getPromise) ⇒ <code>Promise</code> \| <code>undefined</code>
     * [.generateId()](#Pendings+generateId) ⇒ <code>String</code>
 
@@ -168,6 +171,7 @@ Checks if pending promise with specified `id` exists.
 
 ### pendings.resolve(id, [value])
 Resolves pending promise by `id` with specified `value`.
+Throws if promise does not exist.
 
 **Kind**: instance method of [<code>Pendings</code>](#Pendings)  
 
@@ -180,12 +184,64 @@ Resolves pending promise by `id` with specified `value`.
 
 ### pendings.reject(id, [reason])
 Rejects pending promise by `id` with specified `reason`.
+Throws if promise does not exist.
 
 **Kind**: instance method of [<code>Pendings</code>](#Pendings)  
 
 | Param | Type |
 | --- | --- |
 | id | <code>String</code> \| <code>Number</code> | 
+| [reason] | <code>\*</code> | 
+
+<a name="Pendings+fulfill"></a>
+
+### pendings.fulfill(id, [value], [reason])
+Rejects pending promise by `id` if `reason` is truthy, otherwise resolves with `value`.
+Throws if promise does not exist.
+
+**Kind**: instance method of [<code>Pendings</code>](#Pendings)  
+
+| Param | Type |
+| --- | --- |
+| id | <code>String</code> \| <code>Number</code> | 
+| [value] | <code>\*</code> | 
+| [reason] | <code>\*</code> | 
+
+<a name="Pendings+tryResolve"></a>
+
+### pendings.tryResolve(id, [value])
+Resolves pending promise by `id` with specified `value` if it exists.
+
+**Kind**: instance method of [<code>Pendings</code>](#Pendings)  
+
+| Param | Type |
+| --- | --- |
+| id | <code>String</code> \| <code>Number</code> | 
+| [value] | <code>\*</code> | 
+
+<a name="Pendings+tryReject"></a>
+
+### pendings.tryReject(id, [reason])
+Rejects pending promise by `id` with specified `reason` if it exists.
+
+**Kind**: instance method of [<code>Pendings</code>](#Pendings)  
+
+| Param | Type |
+| --- | --- |
+| id | <code>String</code> \| <code>Number</code> | 
+| [reason] | <code>\*</code> | 
+
+<a name="Pendings+tryFulfill"></a>
+
+### pendings.tryFulfill(id, [value], [reason])
+Rejects pending promise by `id` if `reason` is truthy, otherwise resolves with `value`.
+
+**Kind**: instance method of [<code>Pendings</code>](#Pendings)  
+
+| Param | Type |
+| --- | --- |
+| id | <code>String</code> \| <code>Number</code> | 
+| [value] | <code>\*</code> | 
 | [reason] | <code>\*</code> | 
 
 <a name="Pendings+rejectAll"></a>
@@ -197,19 +253,6 @@ Rejects all pending promises with specified `reason`. Useful for cleanup.
 
 | Param | Type |
 | --- | --- |
-| [reason] | <code>\*</code> | 
-
-<a name="Pendings+fulfill"></a>
-
-### pendings.fulfill(id, [value], [reason])
-Rejects if `reason` is truthy, otherwise resolves with `value`.
-
-**Kind**: instance method of [<code>Pendings</code>](#Pendings)  
-
-| Param | Type |
-| --- | --- |
-| id | <code>String</code> \| <code>Number</code> | 
-| [value] | <code>\*</code> | 
 | [reason] | <code>\*</code> | 
 
 <a name="Pendings+getPromise"></a>
