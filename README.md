@@ -126,10 +126,11 @@ class MyClass {
 Constructor.
 
 
-| Param | Type | Description |
-| --- | --- | --- |
-| [options] | <code>Object</code> |  |
-| [options.timeout] | <code>Number</code> | default timeout for all promises |
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [options] | <code>Object</code> |  |  |
+| [options.idPrefix] | <code>String</code> | <code>&#x27;&#x27;</code> | prefix for generated IDs |
+| [options.timeout] | <code>Number</code> | <code>0</code> | default timeout for all promises |
 
 <a name="Pendings+add"></a>
 

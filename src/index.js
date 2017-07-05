@@ -12,11 +12,13 @@ class Pendings {
    * Constructor.
    *
    * @param {Object} [options]
-   * @param {Number} [options.timeout] default timeout for all promises
+   * @param {String} [options.idPrefix=''] prefix for generated IDs
+   * @param {Number} [options.timeout=0] default timeout for all promises
    */
   constructor(options) {
     options = options || {};
-    this._timeout = options.timeout;
+    this._timeout = options.timeout || 0;
+    this._idPrefix = options.idPrefix || '';
     this._map = Object.create(null);
   }
 
@@ -164,7 +166,7 @@ class Pendings {
    * @returns {String}
    */
   generateId() {
-    return `${Date.now()}-${Math.random()}`;
+    return `${this._idPrefix}${Date.now()}-${Math.random()}`;
   }
 
   _get(id, {throws}) {

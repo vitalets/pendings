@@ -233,15 +233,6 @@ describe('pendings', function () {
     });
   });
 
-  it('should should overwrite generateId method', function () {
-    this.pendings.generateId = () => 1;
-    this.pendings.add(id => assert.equal(id, 1));
-  });
-
-  it('should export Pending as prop', function () {
-    assert.ok(Pendings.Pending);
-  });
-
   describe('rejectAll', function () {
     it('should reject all promises', function () {
       const p1 = this.pendings.add(noop);
@@ -252,5 +243,21 @@ describe('pendings', function () {
         assert.isRejected(p2, 'err'),
       ]);
     });
+  });
+
+  it('should overwrite generateId method', function () {
+    this.pendings.generateId = () => 1;
+    this.pendings.add(id => assert.equal(id, 1));
+  });
+
+  it('should set idPrefix', function () {
+    let id;
+    const pendings = new Pendings({idPrefix: 'client1'});
+    pendings.add(_id => id = _id);
+    assert.equal(id.indexOf('client1'), 0);
+  });
+
+  it('should export Pending as prop', function () {
+    assert.ok(Pendings.Pending);
   });
 });
