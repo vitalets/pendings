@@ -39,18 +39,18 @@
     ]
   },
   "dependencies": {
-    "promise.prototype.finally": "^2.0.1"
+    "promise.prototype.finally": "^3.0.0"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
     "babel-preset-es2015": "^6.24.1",
-    "chai": "^4.0.2",
-    "chai-as-promised": "^7.0.0",
-    "eslint": "^4.0.0",
-    "husky": "^0.13.4",
+    "chai": "^4.1.1",
+    "chai-as-promised": "^7.1.1",
+    "eslint": "^4.4.1",
+    "husky": "^0.14.3",
     "jsdoc-to-markdown": "^3.0.0",
-    "lint-staged": "^4.0.0",
-    "mocha": "^3.4.2"
+    "lint-staged": "^4.0.3",
+    "mocha": "^3.5.0"
   },
   "keywords": [
     "promise",
