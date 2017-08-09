@@ -99,6 +99,6 @@ describe('pending', function () {
   it('should reject after timeout', function () {
     const res = this.pending.call(() => {}, 10);
     setTimeout(() => this.pending.resolve('foo'), 20);
-    return assert.isRejected(res, 'Promise rejected by timeout (10 ms)');
+    return assert.isRejected(res, 'Promise timeout: 10 ms');
   });
 });

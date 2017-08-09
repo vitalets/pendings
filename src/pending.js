@@ -5,10 +5,11 @@
 'use strict';
 
 const promiseFinally = require('promise.prototype.finally');
+const TimeoutError = require('./timeout-error');
 
 class Pending {
   /**
-   * Constructor.
+   * Creates instance of single pending promise. It holds `resolve / reject` callbacks for future fulfillment.
    */
   constructor() {
     this._resolve = null;
@@ -37,6 +38,7 @@ class Pending {
 
   /**
    * Calls `fn`, returns new promise and holds `resolve` / `reject` callbacks.
+   * If `timeout` specified, the promise will be rejected after `timeout` with `PendingTimeoutError`.
    *
    * @param {Function} fn
    * @param {Number} [timeout=0]
@@ -46,9 +48,9 @@ class Pending {
     this._isFulfilled = false;
     this._createPromise(fn);
     if (timeout) {
-      this._wrapWithTimeout(timeout);
+      this._addTimeout(timeout);
     }
-    this._wrapWithFinally();
+    this._addFinally();
     return this._promise;
   }
 
@@ -88,22 +90,24 @@ class Pending {
     this._promise = new Promise((resolve, reject) => {
       this._resolve = resolve;
       this._reject = reject;
-      if (fn) {
+      if (typeof fn === 'function') {
         fn();
       }
     });
   }
 
-  _wrapWithTimeout(timeout) {
-    const timeoutPromise = new Promise((resolve, reject) => setTimeout(() => {
-      reject(new Error(`Promise rejected by timeout (${timeout} ms)`));
-    }, timeout));
+  _addTimeout(timeout) {
+    const timeoutPromise = wait(timeout).then(() => Promise.reject(new TimeoutError(timeout)));
     this._promise = Promise.race([this._promise, timeoutPromise]);
   }
 
-  _wrapWithFinally() {
+  _addFinally() {
     this._promise = promiseFinally(this._promise, () => this._isFulfilled = true);
   }
+}
+
+function wait(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 module.exports = Pending;

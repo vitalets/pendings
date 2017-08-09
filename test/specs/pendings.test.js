@@ -173,21 +173,21 @@ describe('pendings', function () {
     it('should reject after timeout', function () {
       const res = this.pendings.set(1, noop, {timeout: 50});
       setTimeout(() => this.pendings.tryResolve(1, 'foo'), 100);
-      return assert.isRejected(res, 'Promise rejected by timeout (50 ms)');
+      return assert.isRejected(res, 'Promise timeout: 50 ms');
     });
 
     it('should reject after default timeout', function () {
       const pendings = new Pendings({timeout: 50});
       const res = pendings.set(1, noop);
       setTimeout(() => pendings.tryResolve(1, 'foo'), 100);
-      return assert.isRejected(res, 'Promise rejected by timeout (50 ms)');
+      return assert.isRejected(res, 'Promise timeout: 50 ms');
     });
 
     it('should overwrite default timeout', function () {
       const pendings = new Pendings({timeout: 150});
       const res = pendings.set(1, noop, {timeout: 50});
       setTimeout(() => pendings.tryResolve(1, 'foo'), 100);
-      return assert.isRejected(res, 'Promise rejected by timeout (50 ms)');
+      return assert.isRejected(res, 'Promise timeout: 50 ms');
     });
   });
 
@@ -257,7 +257,11 @@ describe('pendings', function () {
     assert.equal(id.indexOf('client1'), 0);
   });
 
-  it('should export Pending as prop', function () {
+  it('should export Pending', function () {
     assert.ok(Pendings.Pending);
+  });
+
+  it('should export TimeoutError', function () {
+    assert.ok(Pendings.TimeoutError);
   });
 });

@@ -38,6 +38,9 @@
       "es2015"
     ]
   },
+  "dependencies": {
+    "promise.prototype.finally": "^2.0.1"
+  },
   "devDependencies": {
     "babel-cli": "^6.24.1",
     "babel-preset-es2015": "^6.24.1",
@@ -59,8 +62,5 @@
     "promise-wrapper",
     "promise-api"
   ],
-  "license": "MIT",
-  "dependencies": {
-    "promise.prototype.finally": "^2.0.1"
-  }
+  "license": "MIT"
 }

@@ -94,11 +94,91 @@ class MyClass {
 ## Classes
 
 <dl>
-<dt><a href="#Pendings">Pendings</a></dt>
-<dd></dd>
 <dt><a href="#Pending">Pending</a></dt>
 <dd></dd>
+<dt><a href="#Pendings">Pendings</a></dt>
+<dd></dd>
+<dt><a href="#TimeoutError">TimeoutError</a></dt>
+<dd></dd>
 </dl>
+
+<a name="Pending"></a>
+
+## Pending
+**Kind**: global class  
+
+* [Pending](#Pending)
+    * [new Pending()](#new_Pending_new)
+    * [.promise](#Pending+promise) ⇒ <code>Promise</code>
+    * [.isFulfilled](#Pending+isFulfilled) ⇒ <code>Boolean</code>
+    * [.call(fn, [timeout])](#Pending+call) ⇒ <code>Promise</code>
+    * [.resolve([value])](#Pending+resolve)
+    * [.reject([reason])](#Pending+reject)
+    * [.fulfill([value], [reason])](#Pending+fulfill)
+
+<a name="new_Pending_new"></a>
+
+### new Pending()
+Creates instance of single pending promise. It holds `resolve / reject` callbacks for future fulfillment.
+
+<a name="Pending+promise"></a>
+
+### pending.promise ⇒ <code>Promise</code>
+Returns promise itself.
+
+**Kind**: instance property of [<code>Pending</code>](#Pending)  
+<a name="Pending+isFulfilled"></a>
+
+### pending.isFulfilled ⇒ <code>Boolean</code>
+Returns is promise fulfilled or not.
+
+**Kind**: instance property of [<code>Pending</code>](#Pending)  
+<a name="Pending+call"></a>
+
+### pending.call(fn, [timeout]) ⇒ <code>Promise</code>
+Calls `fn`, returns new promise and holds `resolve` / `reject` callbacks.
+If `timeout` specified, the promise will be rejected after `timeout` with `PendingTimeoutError`.
+
+**Kind**: instance method of [<code>Pending</code>](#Pending)  
+
+| Param | Type | Default |
+| --- | --- | --- |
+| fn | <code>function</code> |  | 
+| [timeout] | <code>Number</code> | <code>0</code> | 
+
+<a name="Pending+resolve"></a>
+
+### pending.resolve([value])
+Resolves pending promise with specified `value`.
+
+**Kind**: instance method of [<code>Pending</code>](#Pending)  
+
+| Param | Type |
+| --- | --- |
+| [value] | <code>\*</code> | 
+
+<a name="Pending+reject"></a>
+
+### pending.reject([reason])
+Rejects pending promise with specified `reason`.
+
+**Kind**: instance method of [<code>Pending</code>](#Pending)  
+
+| Param | Type |
+| --- | --- |
+| [reason] | <code>\*</code> | 
+
+<a name="Pending+fulfill"></a>
+
+### pending.fulfill([value], [reason])
+Rejects if `reason` is truthy, otherwise resolves with `value`.
+
+**Kind**: instance method of [<code>Pending</code>](#Pending)  
+
+| Param | Type |
+| --- | --- |
+| [value] | <code>\*</code> | 
+| [reason] | <code>\*</code> | 
 
 <a name="Pendings"></a>
 
@@ -123,7 +203,7 @@ class MyClass {
 <a name="new_Pendings_new"></a>
 
 ### new Pendings([options])
-Constructor.
+Creates list of pending promises.
 
 
 | Param | Type | Default | Description |
@@ -275,82 +355,19 @@ Returns promise of pending object with specified `id`.
 Generates unique ID. Can be overwritten.
 
 **Kind**: instance method of [<code>Pendings</code>](#Pendings)  
-<a name="Pending"></a>
+<a name="TimeoutError"></a>
 
-## Pending
+## TimeoutError
 **Kind**: global class  
+<a name="new_TimeoutError_new"></a>
 
-* [Pending](#Pending)
-    * [new Pending()](#new_Pending_new)
-    * [.promise](#Pending+promise) ⇒ <code>Promise</code>
-    * [.isFulfilled](#Pending+isFulfilled) ⇒ <code>Boolean</code>
-    * [.call(fn, [timeout])](#Pending+call) ⇒ <code>Promise</code>
-    * [.resolve([value])](#Pending+resolve)
-    * [.reject([reason])](#Pending+reject)
-    * [.fulfill([value], [reason])](#Pending+fulfill)
+### new TimeoutError(timeout)
+Timeout error for pending promise.
 
-<a name="new_Pending_new"></a>
-
-### new Pending()
-Constructor.
-
-<a name="Pending+promise"></a>
-
-### pending.promise ⇒ <code>Promise</code>
-Returns promise itself.
-
-**Kind**: instance property of [<code>Pending</code>](#Pending)  
-<a name="Pending+isFulfilled"></a>
-
-### pending.isFulfilled ⇒ <code>Boolean</code>
-Returns is promise fulfilled or not.
-
-**Kind**: instance property of [<code>Pending</code>](#Pending)  
-<a name="Pending+call"></a>
-
-### pending.call(fn, [timeout]) ⇒ <code>Promise</code>
-Calls `fn`, returns new promise and holds `resolve` / `reject` callbacks.
-
-**Kind**: instance method of [<code>Pending</code>](#Pending)  
-
-| Param | Type | Default |
-| --- | --- | --- |
-| fn | <code>function</code> |  | 
-| [timeout] | <code>Number</code> | <code>0</code> | 
-
-<a name="Pending+resolve"></a>
-
-### pending.resolve([value])
-Resolves pending promise with specified `value`.
-
-**Kind**: instance method of [<code>Pending</code>](#Pending)  
 
 | Param | Type |
 | --- | --- |
-| [value] | <code>\*</code> | 
-
-<a name="Pending+reject"></a>
-
-### pending.reject([reason])
-Rejects pending promise with specified `reason`.
-
-**Kind**: instance method of [<code>Pending</code>](#Pending)  
-
-| Param | Type |
-| --- | --- |
-| [reason] | <code>\*</code> | 
-
-<a name="Pending+fulfill"></a>
-
-### pending.fulfill([value], [reason])
-Rejects if `reason` is truthy, otherwise resolves with `value`.
-
-**Kind**: instance method of [<code>Pending</code>](#Pending)  
-
-| Param | Type |
-| --- | --- |
-| [value] | <code>\*</code> | 
-| [reason] | <code>\*</code> | 
+| timeout | <code>Number</code> | 
 
 
 ## License
