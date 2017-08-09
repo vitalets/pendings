@@ -110,6 +110,8 @@ class MyClass {
 * [Pending](#Pending)
     * [new Pending()](#new_Pending_new)
     * [.promise](#Pending+promise) ⇒ <code>Promise</code>
+    * [.isResolved](#Pending+isResolved) ⇒ <code>Boolean</code>
+    * [.isRejected](#Pending+isRejected) ⇒ <code>Boolean</code>
     * [.isFulfilled](#Pending+isFulfilled) ⇒ <code>Boolean</code>
     * [.call(fn, [timeout])](#Pending+call) ⇒ <code>Promise</code>
     * [.resolve([value])](#Pending+resolve)
@@ -127,10 +129,22 @@ Creates instance of single pending promise. It holds `resolve / reject` callback
 Returns promise itself.
 
 **Kind**: instance property of [<code>Pending</code>](#Pending)  
+<a name="Pending+isResolved"></a>
+
+### pending.isResolved ⇒ <code>Boolean</code>
+Returns true if promise resolved.
+
+**Kind**: instance property of [<code>Pending</code>](#Pending)  
+<a name="Pending+isRejected"></a>
+
+### pending.isRejected ⇒ <code>Boolean</code>
+Returns true if promise rejected.
+
+**Kind**: instance property of [<code>Pending</code>](#Pending)  
 <a name="Pending+isFulfilled"></a>
 
 ### pending.isFulfilled ⇒ <code>Boolean</code>
-Returns is promise fulfilled or not.
+Returns true if promise fulfilled (resolved or rejected).
 
 **Kind**: instance property of [<code>Pending</code>](#Pending)  
 <a name="Pending+call"></a>
@@ -197,7 +211,6 @@ Rejects if `reason` is truthy, otherwise resolves with `value`.
     * [.tryReject(id, [reason])](#Pendings+tryReject)
     * [.tryFulfill(id, [value], [reason])](#Pendings+tryFulfill)
     * [.rejectAll([reason])](#Pendings+rejectAll)
-    * [.getPromise(id)](#Pendings+getPromise) ⇒ <code>Promise</code> \| <code>undefined</code>
     * [.generateId()](#Pendings+generateId) ⇒ <code>String</code>
 
 <a name="new_Pendings_new"></a>
@@ -229,6 +242,7 @@ Calls `fn` and returns new promise. `fn` gets generated unique `id` as parameter
 
 ### pendings.set(id, fn, [options]) ⇒ <code>Promise</code>
 Calls `fn` and returns new promise with specified `id`.
+If promise with such `id` already pending - it will be returned.
 
 **Kind**: instance method of [<code>Pendings</code>](#Pendings)  
 
@@ -242,7 +256,7 @@ Calls `fn` and returns new promise with specified `id`.
 <a name="Pendings+has"></a>
 
 ### pendings.has(id) ⇒ <code>Boolean</code>
-Checks if pending promise with specified `id` exists.
+Checks if promise with specified `id` is pending.
 
 **Kind**: instance method of [<code>Pendings</code>](#Pendings)  
 
@@ -254,7 +268,7 @@ Checks if pending promise with specified `id` exists.
 
 ### pendings.resolve(id, [value])
 Resolves pending promise by `id` with specified `value`.
-Throws if promise does not exist.
+Throws if promise does not exist or is already fulfilled.
 
 **Kind**: instance method of [<code>Pendings</code>](#Pendings)  
 
@@ -267,7 +281,7 @@ Throws if promise does not exist.
 
 ### pendings.reject(id, [reason])
 Rejects pending promise by `id` with specified `reason`.
-Throws if promise does not exist.
+Throws if promise does not exist or is already fulfilled.
 
 **Kind**: instance method of [<code>Pendings</code>](#Pendings)  
 
@@ -280,7 +294,7 @@ Throws if promise does not exist.
 
 ### pendings.fulfill(id, [value], [reason])
 Rejects pending promise by `id` if `reason` is truthy, otherwise resolves with `value`.
-Throws if promise does not exist.
+Throws if promise does not exist or is already fulfilled.
 
 **Kind**: instance method of [<code>Pendings</code>](#Pendings)  
 
@@ -337,17 +351,6 @@ Rejects all pending promises with specified `reason`. Useful for cleanup.
 | Param | Type |
 | --- | --- |
 | [reason] | <code>\*</code> | 
-
-<a name="Pendings+getPromise"></a>
-
-### pendings.getPromise(id) ⇒ <code>Promise</code> \| <code>undefined</code>
-Returns promise of pending object with specified `id`.
-
-**Kind**: instance method of [<code>Pendings</code>](#Pendings)  
-
-| Param | Type |
-| --- | --- |
-| id | <code>String</code> | 
 
 <a name="Pendings+generateId"></a>
 

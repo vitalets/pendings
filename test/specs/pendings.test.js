@@ -55,6 +55,43 @@ describe('pendings', function () {
     });
   });
 
+  describe('has', function () {
+    it('should return false for non-existing promise', function () {
+      assert.notOk(this.pendings.has(1));
+    });
+
+    it('should return true for pending promise', function () {
+      this.pendings.set(1, noop);
+      assert.ok(this.pendings.has(1));
+    });
+
+    it('should return false for resolve', function () {
+      this.pendings.set(1, noop);
+      this.pendings.resolve(1);
+      assert.notOk(this.pendings.has(1));
+    });
+
+    it('should return false for manual reject', function () {
+      this.pendings.set(1, noop);
+      this.pendings.reject(1);
+      assert.notOk(this.pendings.has(1));
+    });
+
+    it('should return false for reject by fn', function () {
+      this.pendings.set(1, () => { throw new Error('foo'); });
+      assert.notOk(this.pendings.has(1));
+    });
+
+    it('should return false for reject by timeout', function (done) {
+      this.pendings.set(1, noop, {timeout: 5});
+      assert.ok(this.pendings.has(1));
+      setTimeout(() => {
+        assert.notOk(this.pendings.has(1));
+        done();
+      }, 10);
+    });
+  });
+
   describe('resolve', function () {
     it('should resolve', function () {
       const res = this.pendings.set(1, noop);
@@ -66,26 +103,19 @@ describe('pendings', function () {
       this.pendings.set(1, noop);
       assert.throws(() => this.pendings.resolve(2, 'foo'), 'Pending promise not found with id: 2');
     });
-
-    it('should delete promise after resolve', function () {
-      const p = this.pendings.set(1, noop);
-      this.pendings.resolve(1, 1);
-      return assert.isFulfilled(p)
-        .then(() => assert.notOk(this.pendings.has(1)));
-    });
   });
 
   describe('tryResolve', function () {
-    it('should not throw for incorrect id', function () {
-      this.pendings.set(1, noop);
-      assert.doesNotThrow(() => this.pendings.tryResolve(2, 'foo'));
-    });
-
     it('should resolve', function () {
       const res = this.pendings.set(1, noop);
       this.pendings.tryResolve(1, 'foo');
       this.pendings.tryResolve(1, 'bar');
       return assert.eventually.equal(res, 'foo');
+    });
+
+    it('should not throw for incorrect id', function () {
+      this.pendings.set(1, noop);
+      assert.doesNotThrow(() => this.pendings.tryResolve(2, 'foo'));
     });
   });
 
@@ -99,13 +129,6 @@ describe('pendings', function () {
     it('should throw for incorrect id', function () {
       this.pendings.set(1, noop);
       assert.throws(() => this.pendings.reject(2, 'foo'), 'Pending promise not found with id: 2');
-    });
-
-    it('should delete promise after reject', function () {
-      const p = this.pendings.set(1, noop);
-      this.pendings.reject(1, 'err');
-      return assert.isRejected(p, 'err')
-        .then(() => assert.notOk(this.pendings.has(1)));
     });
   });
 
@@ -171,65 +194,20 @@ describe('pendings', function () {
     });
 
     it('should reject after timeout', function () {
-      const res = this.pendings.set(1, noop, {timeout: 50});
-      setTimeout(() => this.pendings.tryResolve(1, 'foo'), 100);
-      return assert.isRejected(res, 'Promise timeout: 50 ms');
+      const res = this.pendings.set(1, noop, {timeout: 5});
+      return assert.isRejected(res, 'Promise timeout: 5 ms');
     });
 
     it('should reject after default timeout', function () {
-      const pendings = new Pendings({timeout: 50});
+      const pendings = new Pendings({timeout: 5});
       const res = pendings.set(1, noop);
-      setTimeout(() => pendings.tryResolve(1, 'foo'), 100);
-      return assert.isRejected(res, 'Promise timeout: 50 ms');
+      return assert.isRejected(res, 'Promise timeout: 5 ms');
     });
 
     it('should overwrite default timeout', function () {
-      const pendings = new Pendings({timeout: 150});
-      const res = pendings.set(1, noop, {timeout: 50});
-      setTimeout(() => pendings.tryResolve(1, 'foo'), 100);
-      return assert.isRejected(res, 'Promise timeout: 50 ms');
-    });
-  });
-
-  describe('has', function () {
-    it('should return false for non-existing promise', function () {
-      assert.notOk(this.pendings.has(1));
-    });
-
-    it('should return true for pending promise', function () {
-      this.pendings.set(1, noop);
-      assert.ok(this.pendings.has(1));
-    });
-
-    it('should return false for resolved promise', function () {
-      const p = this.pendings.set(1, noop);
-      this.pendings.resolve(1);
-      return assert.isFulfilled(p)
-        .then(() => assert.notOk(this.pendings.has(1)));
-    });
-
-    it('should return false for rejected promise', function () {
-      const p = this.pendings.set(1, noop);
-      this.pendings.reject(1);
-      return assert.isRejected(p)
-        .then(() => assert.notOk(this.pendings.has(1)));
-    });
-  });
-
-  describe('getPromise', function () {
-    it('should return promise of existing pending', function () {
-      const p = this.pendings.set(1, noop);
-      assert.equal(p, this.pendings.getPromise(1));
-    });
-
-    it('should return promise of timeouted pending', function () {
-      const p = this.pendings.set(1, noop, {timeout: 10});
-      assert.equal(p, this.pendings.getPromise(1));
-      return assert.isRejected(p);
-    });
-
-    it('should return undefined for non-existing pending', function () {
-      assert.equal(this.pendings.getPromise(1));
+      const pendings = new Pendings({timeout: 10});
+      const res = pendings.set(1, noop, {timeout: 5});
+      return assert.isRejected(res, 'Promise timeout: 5 ms');
     });
   });
 

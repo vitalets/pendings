@@ -4,7 +4,6 @@
 
 'use strict';
 
-const promiseFinally = require('promise.prototype.finally');
 const Pending = require('./pending');
 
 class Pendings {
@@ -37,6 +36,7 @@ class Pendings {
 
   /**
    * Calls `fn` and returns new promise with specified `id`.
+   * If promise with such `id` already pending - it will be returned.
    *
    * @param {String} id
    * @param {Function} fn
@@ -46,59 +46,68 @@ class Pendings {
    */
   set(id, fn, options) {
     if (!this.has(id)) {
-      const pending = this._map[id] = new Pending();
+      const pending = new Pending();
       const timeout = this._getTimeout(options);
-      const promise = pending.call(() => fn(id), timeout);
-      pending.finalPromise = promiseFinally(promise, () => delete this._map[id]);
+      pending.call(() => fn(id), timeout);
+      this._map[id] = pending;
     }
-    return this.getPromise(id);
+    return this._map[id].promise;
   }
 
   /**
-   * Checks if pending promise with specified `id` exists.
+   * Checks if promise with specified `id` is pending.
    *
    * @param {String} id
    * @returns {Boolean}
    */
   has(id) {
-    return Boolean(this._map[id]);
+    return this._map[id] && !this._map[id].isFulfilled;
   }
 
   /**
    * Resolves pending promise by `id` with specified `value`.
-   * Throws if promise does not exist.
+   * Throws if promise does not exist or is already fulfilled.
    *
    * @param {String} id
    * @param {*} [value]
    */
   resolve(id, value) {
-    const pending = this._get(id, {throws: true});
-    pending.resolve(value);
+    if (this.has(id)) {
+      this._map[id].resolve(value);
+    } else {
+      throw createNoPendingError(id);
+    }
   }
 
   /**
    * Rejects pending promise by `id` with specified `reason`.
-   * Throws if promise does not exist.
+   * Throws if promise does not exist or is already fulfilled.
    *
    * @param {String} id
    * @param {*} [reason]
    */
   reject(id, reason) {
-    const pending = this._get(id, {throws: true});
-    pending.reject(reason);
+    if (this.has(id)) {
+      this._map[id].reject(reason);
+    } else {
+      throw createNoPendingError(id);
+    }
   }
 
   /**
    * Rejects pending promise by `id` if `reason` is truthy, otherwise resolves with `value`.
-   * Throws if promise does not exist.
+   * Throws if promise does not exist or is already fulfilled.
    *
    * @param {String} id
    * @param {*} [value]
    * @param {*} [reason]
    */
   fulfill(id, value, reason) {
-    const pending = this._get(id, {throws: true});
-    pending.fulfill(value, reason);
+    if (this.has(id)) {
+      this._map[id].fulfill(value, reason);
+    } else {
+      throw createNoPendingError(id);
+    }
   }
 
   /**
@@ -108,9 +117,8 @@ class Pendings {
    * @param {*} [value]
    */
   tryResolve(id, value) {
-    const pending = this._get(id, {throws: false});
-    if (pending) {
-      pending.resolve(value);
+    if (this.has(id)) {
+      this._map[id].resolve(value);
     }
   }
 
@@ -121,9 +129,8 @@ class Pendings {
    * @param {*} [reason]
    */
   tryReject(id, reason) {
-    const pending = this._get(id, {throws: false});
-    if (pending) {
-      pending.reject(reason);
+    if (this.has(id)) {
+      this._map[id].reject(reason);
     }
   }
 
@@ -135,9 +142,8 @@ class Pendings {
    * @param {*} [reason]
    */
   tryFulfill(id, value, reason) {
-    const pending = this._get(id, {throws: false});
-    if (pending) {
-      pending.fulfill(value, reason);
+    if (this.has(id)) {
+      this._map[id].fulfill(value, reason);
     }
   }
 
@@ -147,17 +153,7 @@ class Pendings {
    * @param {*} [reason]
    */
   rejectAll(reason) {
-    Object.keys(this._map).forEach(id => this.reject(id, reason));
-  }
-
-  /**
-   * Returns promise of pending object with specified `id`.
-   *
-   * @param {String} id
-   * @returns {Promise|undefined}
-   */
-  getPromise(id) {
-    return this._map[id] && this._map[id].finalPromise;
+    Object.keys(this._map).forEach(id => this.tryReject(id, reason));
   }
 
   /**
@@ -169,19 +165,14 @@ class Pendings {
     return `${this._idPrefix}${Date.now()}-${Math.random()}`;
   }
 
-  _get(id, {throws}) {
-    const pending = this._map[id];
-    if (!pending && throws) {
-      throw new Error(`Pending promise not found with id: ${id}`);
-    } else {
-      return pending;
-    }
-  }
-
   _getTimeout(options) {
     options = options || {};
     return options.timeout !== undefined ? options.timeout : this._timeout;
   }
+}
+
+function createNoPendingError(id) {
+  return new Error(`Pending promise not found with id: ${id}`);
 }
 
 module.exports = Pendings;

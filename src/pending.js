@@ -4,7 +4,6 @@
 
 'use strict';
 
-const promiseFinally = require('promise.prototype.finally');
 const TimeoutError = require('./timeout-error');
 
 class Pending {
@@ -14,8 +13,10 @@ class Pending {
   constructor() {
     this._resolve = null;
     this._reject = null;
-    this._isFulfilled = true;
+    this._isResolved = true;
+    this._isRejected = false;
     this._promise = null;
+    this._timer = null;
   }
 
   /**
@@ -28,12 +29,30 @@ class Pending {
   }
 
   /**
-   * Returns is promise fulfilled or not.
+   * Returns true if promise resolved.
+   *
+   * @returns {Boolean}
+   */
+  get isResolved() {
+    return this._isResolved;
+  }
+
+  /**
+   * Returns true if promise rejected.
+   *
+   * @returns {Boolean}
+   */
+  get isRejected() {
+    return this._isRejected;
+  }
+
+  /**
+   * Returns true if promise fulfilled (resolved or rejected).
    *
    * @returns {Boolean}
    */
   get isFulfilled() {
-    return this._isFulfilled;
+    return this._isResolved || this._isRejected;
   }
 
   /**
@@ -45,12 +64,10 @@ class Pending {
    * @returns {Promise}
    */
   call(fn, timeout) {
-    this._isFulfilled = false;
-    this._createPromise(fn);
-    if (timeout) {
-      this._addTimeout(timeout);
+    if (this.isFulfilled) {
+      this._reset();
+      this._createPromise(fn, timeout);
     }
-    this._addFinally();
     return this._promise;
   }
 
@@ -60,7 +77,11 @@ class Pending {
    * @param {*} [value]
    */
   resolve(value) {
-    this._resolve(value);
+    if (!this.isFulfilled) {
+      this._isResolved = true;
+      this._clearTimer();
+      this._resolve(value);
+    }
   }
 
   /**
@@ -69,7 +90,11 @@ class Pending {
    * @param {*} [reason]
    */
   reject(reason) {
-    this._reject(reason);
+    if (!this.isFulfilled) {
+      this._isRejected = true;
+      this._clearTimer();
+      this._reject(reason);
+    }
   }
 
   /**
@@ -86,28 +111,46 @@ class Pending {
     }
   }
 
-  _createPromise(fn) {
+  _createPromise(fn, timeout) {
+    this._initPromise(fn);
+    if (timeout) {
+      this._initTimer(timeout);
+    }
+  }
+
+  _initPromise(fn) {
     this._promise = new Promise((resolve, reject) => {
       this._resolve = resolve;
       this._reject = reject;
       if (typeof fn === 'function') {
-        fn();
+        this._callFn(fn);
       }
     });
   }
 
-  _addTimeout(timeout) {
-    const timeoutPromise = wait(timeout).then(() => Promise.reject(new TimeoutError(timeout)));
-    this._promise = Promise.race([this._promise, timeoutPromise]);
+  _callFn(fn) {
+    try {
+      fn();
+    } catch (e) {
+      this.reject(e);
+    }
   }
 
-  _addFinally() {
-    this._promise = promiseFinally(this._promise, () => this._isFulfilled = true);
+  _initTimer(timeout) {
+    this._timer = setTimeout(() => this.reject(new TimeoutError(timeout)), timeout);
   }
-}
 
-function wait(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  _clearTimer() {
+    if (this._timer) {
+      clearTimeout(this._timer);
+      this._timer = null;
+    }
+  }
+
+  _reset() {
+    this._isResolved = false;
+    this._isRejected = false;
+  }
 }
 
 module.exports = Pending;

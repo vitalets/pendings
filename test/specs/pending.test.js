@@ -24,6 +24,19 @@ describe('pending', function () {
     assert.equal(a, 1);
   });
 
+  it('should return the same promise for second call if previous was not fulfilled', function () {
+    const p1 = this.pending.call(() => {});
+    const p2 = this.pending.call(() => {});
+    assert.equal(p1, p2);
+  });
+
+  it('should return new promise for second call if previous was fulfilled', function () {
+    const p1 = this.pending.call(() => {});
+    this.pending.resolve();
+    const p2 = this.pending.call(() => {});
+    assert.notEqual(p1, p2);
+  });
+
   it('should allow to call without fn', function () {
     const res = this.pending.call();
     this.pending.resolve('foo');
@@ -68,10 +81,10 @@ describe('pending', function () {
 
   it('should set isFulfilled after resolve', function () {
     assert.ok(this.pending.isFulfilled);
-    const res = this.pending.call();
+    this.pending.call();
     assert.notOk(this.pending.isFulfilled);
     this.pending.resolve('foo');
-    return assert.isFulfilled(res).then(() => assert.ok(this.pending.isFulfilled));
+    assert.ok(this.pending.isFulfilled);
   });
 
   it('should set isFulfilled after reject', function () {
@@ -79,15 +92,15 @@ describe('pending', function () {
     const res = this.pending.call();
     assert.notOk(this.pending.isFulfilled);
     this.pending.reject('foo');
+    assert.ok(this.pending.isFulfilled);
     return assert.isRejected(res, 'foo');
   });
 
   it('should set isFulfilled after reject (by error in fn)', function () {
     assert.ok(this.pending.isFulfilled);
     const res = this.pending.call(() => { throw new Error('err'); });
-    assert.notOk(this.pending.isFulfilled);
-    return assert.isRejected(res, 'err')
-      .then(() => assert.ok(this.pending.isFulfilled));
+    assert.ok(this.pending.isFulfilled);
+    return assert.isRejected(res, 'err');
   });
 
   it('should resolve before timeout', function () {
