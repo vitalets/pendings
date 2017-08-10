@@ -17,6 +17,7 @@ class Pending {
     this._isRejected = false;
     this._promise = null;
     this._timer = null;
+    this._onFulfilled = () => {};
   }
 
   /**
@@ -56,6 +57,19 @@ class Pending {
   }
 
   /**
+   * Callback called when promise is fulfilled (resolved or rejected).
+   *
+   * @param {Function} fn
+   */
+  set onFulfilled(fn) {
+    if (typeof fn === 'function') {
+      this._onFulfilled = fn;
+    } else {
+      throw new Error('onFulfilled should be a function.');
+    }
+  }
+
+  /**
    * Calls `fn`, returns new promise and holds `resolve` / `reject` callbacks.
    * If `timeout` specified, the promise will be rejected after `timeout` with `PendingTimeoutError`.
    *
@@ -81,6 +95,7 @@ class Pending {
       this._isResolved = true;
       this._clearTimer();
       this._resolve(value);
+      this._onFulfilled(this);
     }
   }
 
@@ -94,6 +109,7 @@ class Pending {
       this._isRejected = true;
       this._clearTimer();
       this._reject(reason);
+      this._onFulfilled(this);
     }
   }
 

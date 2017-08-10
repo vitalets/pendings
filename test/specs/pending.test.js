@@ -2,116 +2,173 @@
 
 const Pending = require(`${srcPath}/pending`);
 
+const noop = () => {};
+
 describe('pending', function () {
   beforeEach(function () {
     this.pending = new Pending();
   });
 
-  it('should return Promise', function () {
-    const res = this.pending.call(() => {});
-    assert.instanceOf(res, Promise);
+  describe('call', function () {
+    it('should return Promise', function () {
+      const res = this.pending.call(noop);
+      assert.instanceOf(res, Promise);
+    });
+
+    it('should store Promise', function () {
+      const res = this.pending.call(noop);
+      assert.instanceOf(this.pending.promise, Promise);
+      assert.equal(res, this.pending.promise);
+    });
+
+    it('should call passed fn', function () {
+      let a = 0;
+      this.pending.call(() => a++);
+      assert.equal(a, 1);
+    });
+
+    it('should return the same promise for second call if previous was not fulfilled', function () {
+      const p1 = this.pending.call(noop);
+      const p2 = this.pending.call(noop);
+      assert.equal(p1, p2);
+    });
+
+    it('should return new promise for second call if previous was fulfilled', function () {
+      const p1 = this.pending.call(noop);
+      this.pending.resolve();
+      const p2 = this.pending.call(noop);
+      assert.notEqual(p1, p2);
+    });
+
+    it('should allow to call without fn', function () {
+      const res = this.pending.call();
+      this.pending.resolve('foo');
+      return assert.eventually.equal(res, 'foo');
+    });
   });
 
-  it('should store Promise', function () {
-    const res = this.pending.call(() => {});
-    assert.instanceOf(this.pending.promise, Promise);
-    assert.equal(res, this.pending.promise);
+  describe('resolve', function () {
+    it('should resolve directly', function () {
+      const res = this.pending.call(noop);
+      this.pending.resolve('foo');
+      return assert.eventually.equal(res, 'foo');
+    });
+
+    it('should keep first value if resolved twice', function () {
+      const res = this.pending.call(noop);
+      this.pending.resolve('foo');
+      this.pending.resolve('bar');
+      return assert.eventually.equal(res, 'foo');
+    });
   });
 
-  it('should call passed fn', function () {
-    let a = 0;
-    this.pending.call(() => a++);
-    assert.equal(a, 1);
+  describe('reject', function () {
+    it('should reject in case of error in fn', function () {
+      const res = this.pending.call(() => {
+        throw new Error('err');
+      });
+      return assert.isRejected(res, 'err');
+    });
+
+    it('should reject directly', function () {
+      const res = this.pending.call(noop);
+      this.pending.reject(new Error('err'));
+      return assert.isRejected(res, 'err');
+    });
+
+    it('should keep first value if rejected twice', function () {
+      const res = this.pending.call(noop);
+      this.pending.reject(new Error('foo'));
+      this.pending.reject(new Error('bar'));
+      return assert.isRejected(res, 'foo');
+    });
   });
 
-  it('should return the same promise for second call if previous was not fulfilled', function () {
-    const p1 = this.pending.call(() => {});
-    const p2 = this.pending.call(() => {});
-    assert.equal(p1, p2);
+  describe('fulfill', function () {
+    it('should resolve', function () {
+      const res = this.pending.call(noop);
+      this.pending.fulfill('foo');
+      return assert.eventually.equal(res, 'foo');
+    });
+
+    it('should reject with error', function () {
+      const res = this.pending.call(noop);
+      this.pending.fulfill('foo', new Error('err'));
+      return assert.isRejected(res, 'err');
+    });
+
+    it('should keep first value if fulfilled twice', function () {
+      const res = this.pending.call(noop);
+      this.pending.fulfill('foo');
+      this.pending.fulfill('bar', new Error('err'));
+      return assert.eventually.equal(res, 'foo');
+    });
   });
 
-  it('should return new promise for second call if previous was fulfilled', function () {
-    const p1 = this.pending.call(() => {});
-    this.pending.resolve();
-    const p2 = this.pending.call(() => {});
-    assert.notEqual(p1, p2);
+  describe('isFulfilled', function () {
+    it('should set after resolve', function () {
+      assert.ok(this.pending.isFulfilled);
+      this.pending.call();
+      assert.notOk(this.pending.isFulfilled);
+      this.pending.resolve('foo');
+      assert.ok(this.pending.isFulfilled);
+    });
+
+    it('should set after reject', function () {
+      assert.ok(this.pending.isFulfilled);
+      const res = this.pending.call();
+      assert.notOk(this.pending.isFulfilled);
+      this.pending.reject('foo');
+      assert.ok(this.pending.isFulfilled);
+      return assert.isRejected(res, 'foo');
+    });
+
+    it('should set after reject (by error in fn)', function () {
+      assert.ok(this.pending.isFulfilled);
+      const res = this.pending.call(() => {
+        throw new Error('err');
+      });
+      assert.ok(this.pending.isFulfilled);
+      return assert.isRejected(res, 'err');
+    });
   });
 
-  it('should allow to call without fn', function () {
-    const res = this.pending.call();
-    this.pending.resolve('foo');
-    return assert.eventually.equal(res, 'foo');
+  describe('onFulfilled', function () {
+    it('should call after resolve', function () {
+      let a = 0;
+      this.pending.onFulfilled = () => a++;
+      this.pending.call();
+      this.pending.resolve('foo');
+      assert.equal(a, 1);
+    });
+
+    it('should set after reject', function () {
+      let a = 0;
+      this.pending.onFulfilled = () => a++;
+      this.pending.call().catch(noop);
+      this.pending.reject('foo');
+      assert.equal(a, 1);
+    });
+
+    it('should set after reject (by error in fn)', function () {
+      let a = 0;
+      this.pending.onFulfilled = () => a++;
+      this.pending.call(() => { throw new Error('err'); }).catch(noop);
+      assert.equal(a, 1);
+    });
   });
 
-  it('should reject in case of error in fn', function () {
-    const res = this.pending.call(() => {throw new Error('err');});
-    return assert.isRejected(res, 'err');
-  });
+  describe('timeout', function () {
+    it('should resolve before timeout', function () {
+      const res = this.pending.call(noop, 10);
+      setTimeout(() => this.pending.resolve('foo'), 5);
+      return assert.eventually.equal(res, 'foo');
+    });
 
-  it('should reject directly', function () {
-    const res = this.pending.call(() => {});
-    this.pending.reject(new Error('err'));
-    return assert.isRejected(res, 'err');
-  });
-
-  it('should resolve directly', function () {
-    const res = this.pending.call(() => {});
-    this.pending.resolve('foo');
-    return assert.eventually.equal(res, 'foo');
-  });
-
-  it('should fulfill to resolved', function () {
-    const res = this.pending.call(() => {});
-    this.pending.fulfill('foo');
-    return assert.eventually.equal(res, 'foo');
-  });
-
-  it('should fulfill to rejected with error', function () {
-    const res = this.pending.call(() => {});
-    this.pending.fulfill('foo', new Error('err'));
-    return assert.isRejected(res, 'err');
-  });
-
-  it('should not throw if resolved twice', function () {
-    const res = this.pending.call(() => {});
-    this.pending.resolve('foo');
-    this.pending.resolve('bar');
-    return assert.eventually.equal(res, 'foo');
-  });
-
-  it('should set isFulfilled after resolve', function () {
-    assert.ok(this.pending.isFulfilled);
-    this.pending.call();
-    assert.notOk(this.pending.isFulfilled);
-    this.pending.resolve('foo');
-    assert.ok(this.pending.isFulfilled);
-  });
-
-  it('should set isFulfilled after reject', function () {
-    assert.ok(this.pending.isFulfilled);
-    const res = this.pending.call();
-    assert.notOk(this.pending.isFulfilled);
-    this.pending.reject('foo');
-    assert.ok(this.pending.isFulfilled);
-    return assert.isRejected(res, 'foo');
-  });
-
-  it('should set isFulfilled after reject (by error in fn)', function () {
-    assert.ok(this.pending.isFulfilled);
-    const res = this.pending.call(() => { throw new Error('err'); });
-    assert.ok(this.pending.isFulfilled);
-    return assert.isRejected(res, 'err');
-  });
-
-  it('should resolve before timeout', function () {
-    const res = this.pending.call(() => {}, 10);
-    setTimeout(() => this.pending.resolve('foo'), 5);
-    return assert.eventually.equal(res, 'foo');
-  });
-
-  it('should reject after timeout', function () {
-    const res = this.pending.call(() => {}, 10);
-    setTimeout(() => this.pending.resolve('foo'), 20);
-    return assert.isRejected(res, 'Promise timeout: 10 ms');
+    it('should reject after timeout', function () {
+      const res = this.pending.call(noop, 10);
+      setTimeout(() => this.pending.resolve('foo'), 20);
+      return assert.isRejected(res, 'Promise timeout: 10 ms');
+    });
   });
 });

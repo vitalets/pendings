@@ -242,4 +242,13 @@ describe('pendings', function () {
   it('should export TimeoutError', function () {
     assert.ok(Pendings.TimeoutError);
   });
+
+  it('should not store fulfilled pendings', function () {
+    this.pendings.set(1, noop);
+    this.pendings.set(2, noop).catch(() => {});
+    this.pendings.set(3, noop);
+    this.pendings.resolve(1);
+    this.pendings.reject(2);
+    assert.equal(Object.keys(this.pendings._map).length, 1);
+  });
 });

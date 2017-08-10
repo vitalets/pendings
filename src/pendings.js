@@ -45,13 +45,14 @@ class Pendings {
    * @returns {Promise}
    */
   set(id, fn, options) {
-    if (!this.has(id)) {
-      const pending = new Pending();
+    if (this.has(id)) {
+      return this._map[id].promise;
+    } else {
+      const pending = this._map[id] = new Pending();
       const timeout = this._getTimeout(options);
-      pending.call(() => fn(id), timeout);
-      this._map[id] = pending;
+      pending.onFulfilled = () => delete this._map[id];
+      return pending.call(() => fn(id), timeout);
     }
-    return this._map[id].promise;
   }
 
   /**
@@ -61,7 +62,7 @@ class Pendings {
    * @returns {Boolean}
    */
   has(id) {
-    return this._map[id] && !this._map[id].isFulfilled;
+    return Boolean(this._map[id]);
   }
 
   /**
