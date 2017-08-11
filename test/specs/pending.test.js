@@ -70,6 +70,11 @@ describe('pending', function () {
       return assert.eventually.equal(res, 'foo');
     });
 
+    it('should resolve inside fn', function () {
+      const res = this.pending.call(() => this.pending.resolve('foo'));
+      return assert.eventually.equal(res, 'foo');
+    });
+
     it('should keep first value if resolved twice', function () {
       const res = this.pending.call(noop);
       this.pending.resolve('foo');
@@ -93,6 +98,11 @@ describe('pending', function () {
     it('should reject directly', function () {
       const res = this.pending.call(noop);
       this.pending.reject(new Error('err'));
+      return assert.isRejected(res, 'err');
+    });
+
+    it('should reject inside fn', function () {
+      const res = this.pending.call(() => this.pending.reject(new Error('err')));
       return assert.isRejected(res, 'err');
     });
 
