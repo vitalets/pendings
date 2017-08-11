@@ -8,7 +8,7 @@ const Pending = require('./pending');
 
 class Pendings {
   /**
-   * Creates list of pending promises.
+   * Creates dynamic list of promises. When each promise if fulfilled it is remove from list.
    *
    * @param {Object} [options]
    * @param {String} [options.idPrefix=''] prefix for generated IDs

@@ -13,7 +13,10 @@ class Pending {
   constructor() {
     this._resolve = null;
     this._reject = null;
-    this._isResolved = true;
+    // it seems that isPending can be calculated as `Boolean(this._promise) && !this.isFulfilled`,
+    // but it is not true: if call(fn) throws error in the same tick, `this._promise` is yet undefined.
+    this._isPending = false;
+    this._isResolved = false;
     this._isRejected = false;
     this._promise = null;
     this._timer = null;
@@ -78,11 +81,13 @@ class Pending {
    * @returns {Promise}
    */
   call(fn, timeout) {
-    if (this.isFulfilled) {
-      this._reset();
+    if (this._isPending || this.isFulfilled) {
+      return this._promise;
+    } else {
+      this.reset();
       this._createPromise(fn, timeout);
+      return this._promise;
     }
-    return this._promise;
   }
 
   /**
@@ -91,7 +96,8 @@ class Pending {
    * @param {*} [value]
    */
   resolve(value) {
-    if (!this.isFulfilled) {
+    if (this._isPending) {
+      this._isPending = false;
       this._isResolved = true;
       this._clearTimer();
       this._resolve(value);
@@ -105,7 +111,8 @@ class Pending {
    * @param {*} [reason]
    */
   reject(reason) {
-    if (!this.isFulfilled) {
+    if (this._isPending) {
+      this._isPending = false;
       this._isRejected = true;
       this._clearTimer();
       this._reject(reason);
@@ -114,7 +121,7 @@ class Pending {
   }
 
   /**
-   * Rejects if `reason` is truthy, otherwise resolves with `value`.
+   * Helper method: rejects if `reason` is truthy, otherwise resolves with `value`.
    *
    * @param {*} [value]
    * @param {*} [reason]
@@ -127,6 +134,20 @@ class Pending {
     }
   }
 
+  /**
+   * Resets to initial state.
+   */
+  reset() {
+    if (this._isPending) {
+      this.reject(new Error('Pending reset'));
+    }
+    this._promise = null;
+    this._isPending = false;
+    this._isResolved = false;
+    this._isRejected = false;
+    this._clearTimer();
+  }
+
   _createPromise(fn, timeout) {
     this._initPromise(fn);
     if (timeout) {
@@ -136,6 +157,7 @@ class Pending {
 
   _initPromise(fn) {
     this._promise = new Promise((resolve, reject) => {
+      this._isPending = true;
       this._resolve = resolve;
       this._reject = reject;
       if (typeof fn === 'function') {
@@ -161,11 +183,6 @@ class Pending {
       clearTimeout(this._timer);
       this._timer = null;
     }
-  }
-
-  _reset() {
-    this._isResolved = false;
-    this._isRejected = false;
   }
 }
 

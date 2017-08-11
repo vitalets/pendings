@@ -33,9 +33,25 @@ describe('pending', function () {
       assert.equal(p1, p2);
     });
 
-    it('should return new promise for second call if previous was fulfilled', function () {
+    it('should return the same promise for second call if previous was fulfilled', function () {
       const p1 = this.pending.call(noop);
       this.pending.resolve();
+      const p2 = this.pending.call(noop);
+      assert.equal(p1, p2);
+    });
+
+    it('should return new promise for second call after resolve + reset', function () {
+      const p1 = this.pending.call(noop);
+      this.pending.resolve();
+      this.pending.reset();
+      const p2 = this.pending.call(noop);
+      assert.notEqual(p1, p2);
+    });
+
+    it('should return new promise for second call after reject + reset', function () {
+      const p1 = this.pending.call(noop);
+      this.pending.reject();
+      this.pending.reset();
       const p2 = this.pending.call(noop);
       assert.notEqual(p1, p2);
     });
@@ -60,6 +76,10 @@ describe('pending', function () {
       this.pending.resolve('bar');
       return assert.eventually.equal(res, 'foo');
     });
+
+    it('should do nothing for resolve without call', function () {
+      assert.doesNotThrow(() => this.pending.resolve('foo'));
+    });
   });
 
   describe('reject', function () {
@@ -81,6 +101,10 @@ describe('pending', function () {
       this.pending.reject(new Error('foo'));
       this.pending.reject(new Error('bar'));
       return assert.isRejected(res, 'foo');
+    });
+
+    it('should do nothing for reject without call', function () {
+      assert.doesNotThrow(() => this.pending.reject('foo'));
     });
   });
 
@@ -107,15 +131,15 @@ describe('pending', function () {
 
   describe('isFulfilled', function () {
     it('should set after resolve', function () {
-      assert.ok(this.pending.isFulfilled);
+      assert.notOk(this.pending.isFulfilled);
       this.pending.call();
       assert.notOk(this.pending.isFulfilled);
       this.pending.resolve('foo');
       assert.ok(this.pending.isFulfilled);
     });
 
-    it('should set after reject', function () {
-      assert.ok(this.pending.isFulfilled);
+    it('should set after manual reject', function () {
+      assert.notOk(this.pending.isFulfilled);
       const res = this.pending.call();
       assert.notOk(this.pending.isFulfilled);
       this.pending.reject('foo');
@@ -123,8 +147,8 @@ describe('pending', function () {
       return assert.isRejected(res, 'foo');
     });
 
-    it('should set after reject (by error in fn)', function () {
-      assert.ok(this.pending.isFulfilled);
+    it('should set after reject by error in fn', function () {
+      assert.notOk(this.pending.isFulfilled);
       const res = this.pending.call(() => {
         throw new Error('err');
       });
@@ -155,6 +179,21 @@ describe('pending', function () {
       this.pending.onFulfilled = () => a++;
       this.pending.call(() => { throw new Error('err'); }).catch(noop);
       assert.equal(a, 1);
+    });
+  });
+
+  describe('reset', function () {
+    it('should reset resolved promise', function () {
+      this.pending.call();
+      this.pending.resolve();
+      this.pending.reset();
+      assert.equal(this.pending.isResolved, false);
+    });
+
+    it('should reject pending promise', function () {
+      const res = this.pending.call(noop);
+      this.pending.reset();
+      return assert.isRejected(res, 'Pending reset');
     });
   });
 
