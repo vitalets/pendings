@@ -73,8 +73,11 @@ class Pending {
   }
 
   /**
-   * Calls `fn`, returns new promise and holds `resolve` / `reject` callbacks.
-   * If `timeout` specified, the promise will be rejected after `timeout` with `PendingTimeoutError`.
+   * For the first time this method calls `fn` and returns new promise. Also holds `resolve` / `reject` callbacks
+   * to allow fulfill promise via `pending.resolve()` and `pending.reject()`. All subsequent calls of `.call(fn)`
+   * will return the same promise, which can be still pending or already fulfilled.
+   * To reset this behavior use `.reset()`. If `timeout` is specified, the promise will be automatically rejected
+   * after `timeout` milliseconds with `PendingTimeoutError`.
    *
    * @param {Function} fn
    * @param {Number} [timeout=0]

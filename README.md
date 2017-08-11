@@ -14,26 +14,32 @@ It manages `resolve` / `reject` callbacks and provides convenient access to them
 npm install pendings --save
 ```
 
-## Usage
-When using promises in event-based code we need to manually store `resolve` / `reject` callbacks:
+## Usage (single promise)
+Typical situation with promises in event-based code:
 ```js
 class Foo {
-    asyncRequest() { 
-        return new Promise((resolve, reject) => {
+    constructor() {
+      this.promise = null;
+      this.resolve = null;
+      this.reject = null;
+    }
+    asyncRequest() {
+        if (this.promise) { // if promise already exists - return it
+            return this.promise;
+        }
+        this.promise = new Promise((resolve, reject) => {
             this.resolve = resolve;
             this.reject = reject;
             this.send();
         });
+        return this.promise;
     }
-}    
-```    
-and resolve later:
-```js
     onSuccess(data) {
         this.resolve(data);
     }
+}    
 ```    
-*Pendings* allows to do it simpler:   
+[Pending](#pending) class allows to do it simpler:   
 ```js
 const Pending = require('pendings').Pending;
 
@@ -44,17 +50,15 @@ class Foo {
     asyncRequest() { 
         return this.pending.call(() => this.send());
     }
-}
-```
-and resolve later:
-```js
     onSuccess(data) {
         this.pending.resolve(data);
     }
+}
 ```
-
-This is even more useful for list of promises. 
-Each promise automatically gets unique `id` that allows to fulfill it later: 
+## Usage (list of promises)
+[Pendings](#pendings) class is useful for dynamic list of promises. 
+Each promise can automatically get unique `id` and can be fulfilled later by that id. 
+After fulfillment promise is removed from list.
 ```js
 const Pendings = require('pendings');
 
@@ -70,11 +74,11 @@ class Foo {
     }
     
     onSuccess(data) {
-        this.pendings.resolve(data.id, data); // resolve by `id` property of event
+        this.pendings.resolve(data.id, data); // resolve by `id`
     }
     
     onError(data) {
-        this.pendings.reject(data.id, data); // reject by `id` property of event
+        this.pendings.reject(data.id, data); // reject by `id`
     }
 }
 ```
@@ -108,6 +112,7 @@ class Foo {
     * [.resolve([value])](#Pending+resolve)
     * [.reject([reason])](#Pending+reject)
     * [.fulfill([value], [reason])](#Pending+fulfill)
+    * [.reset()](#Pending+reset)
 
 <a name="new_Pending_new"></a>
 
@@ -152,8 +157,11 @@ Callback called when promise is fulfilled (resolved or rejected).
 <a name="Pending+call"></a>
 
 ### pending.call(fn, [timeout]) ⇒ <code>Promise</code>
-Calls `fn`, returns new promise and holds `resolve` / `reject` callbacks.
-If `timeout` specified, the promise will be rejected after `timeout` with `PendingTimeoutError`.
+For the first time this method calls `fn` and returns new promise. Also holds `resolve` / `reject` callbacks
+to allow fulfill promise via `pending.resolve()` and `pending.reject()`. All subsequent calls of `.call(fn)`
+will return the same promise, which can be still pending or already fulfilled.
+To reset this behavior use `.reset()`. If `timeout` is specified, the promise will be automatically rejected
+after `timeout` milliseconds with `PendingTimeoutError`.
 
 **Kind**: instance method of [<code>Pending</code>](#Pending)  
 
@@ -187,7 +195,7 @@ Rejects pending promise with specified `reason`.
 <a name="Pending+fulfill"></a>
 
 ### pending.fulfill([value], [reason])
-Rejects if `reason` is truthy, otherwise resolves with `value`.
+Helper method: rejects if `reason` is truthy, otherwise resolves with `value`.
 
 **Kind**: instance method of [<code>Pending</code>](#Pending)  
 
@@ -196,6 +204,12 @@ Rejects if `reason` is truthy, otherwise resolves with `value`.
 | [value] | <code>\*</code> | 
 | [reason] | <code>\*</code> | 
 
+<a name="Pending+reset"></a>
+
+### pending.reset()
+Resets to initial state.
+
+**Kind**: instance method of [<code>Pending</code>](#Pending)  
 <a name="Pendings"></a>
 
 ## Pendings
@@ -218,7 +232,7 @@ Rejects if `reason` is truthy, otherwise resolves with `value`.
 <a name="new_Pendings_new"></a>
 
 ### new Pendings([options])
-Creates list of pending promises.
+Creates dynamic list of promises. When each promise if fulfilled it is remove from list.
 
 
 | Param | Type | Default | Description |

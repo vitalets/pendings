@@ -14,26 +14,32 @@ It manages `resolve` / `reject` callbacks and provides convenient access to them
 npm install pendings --save
 ```
 
-## Usage
-When using promises in event-based code we need to manually store `resolve` / `reject` callbacks:
+## Usage (single promise)
+Typical situation with promises in event-based code:
 ```js
 class Foo {
-    asyncRequest() { 
-        return new Promise((resolve, reject) => {
+    constructor() {
+      this.promise = null;
+      this.resolve = null;
+      this.reject = null;
+    }
+    asyncRequest() {
+        if (this.promise) { // if promise already exists - return it
+            return this.promise;
+        }
+        this.promise = new Promise((resolve, reject) => {
             this.resolve = resolve;
             this.reject = reject;
             this.send();
         });
+        return this.promise;
     }
-}    
-```    
-and resolve later:
-```js
     onSuccess(data) {
         this.resolve(data);
     }
+}    
 ```    
-*Pendings* allows to do it simpler:   
+[Pending](#pending) class allows to do it simpler:   
 ```js
 const Pending = require('pendings').Pending;
 
@@ -44,17 +50,15 @@ class Foo {
     asyncRequest() { 
         return this.pending.call(() => this.send());
     }
-}
-```
-and resolve later:
-```js
     onSuccess(data) {
         this.pending.resolve(data);
     }
+}
 ```
-
-This is even more useful for list of promises. 
-Each promise automatically gets unique `id` that allows to fulfill it later: 
+## Usage (list of promises)
+[Pendings](#pendings) class is useful for dynamic list of promises. 
+Each promise can automatically get unique `id` and can be fulfilled later by that id. 
+After fulfillment promise is removed from list.
 ```js
 const Pendings = require('pendings');
 
@@ -70,11 +74,11 @@ class Foo {
     }
     
     onSuccess(data) {
-        this.pendings.resolve(data.id, data); // resolve by `id` property of event
+        this.pendings.resolve(data.id, data); // resolve by `id`
     }
     
     onError(data) {
-        this.pendings.reject(data.id, data); // reject by `id` property of event
+        this.pendings.reject(data.id, data); // reject by `id`
     }
 }
 ```
