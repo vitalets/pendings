@@ -1,6 +1,6 @@
 {
   "name": "pendings",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Better control of pending promises",
   "author": {
     "name": "Vitaliy Potapov",
