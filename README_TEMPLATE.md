@@ -39,7 +39,7 @@ class Foo {
     }
 }    
 ```    
-[Pending](#pending) class allows to do it simpler:   
+[Pending](#Pending) class allows to do it simpler:   
 ```js
 const Pending = require('pendings').Pending;
 
@@ -56,7 +56,7 @@ class Foo {
 }
 ```
 ## Usage (list of promises)
-[Pendings](#pendings) class is useful for dynamic list of promises. 
+[Pendings](#Pendings) class is useful for dynamic list of promises. 
 Each promise can automatically get unique `id` and can be fulfilled later by that id. 
 After fulfillment promise is removed from list.
 ```js
