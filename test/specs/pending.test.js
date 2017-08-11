@@ -198,7 +198,7 @@ describe('pending', function () {
 
     it('should reject pending promise with custom message', function () {
       const res = this.pending.call(noop);
-      this.pending.reset('err');
+      this.pending.reset(new Error('err'));
       return assert.isRejected(res, 'err');
     });
   });
