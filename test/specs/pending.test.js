@@ -193,7 +193,13 @@ describe('pending', function () {
     it('should reject pending promise', function () {
       const res = this.pending.call(noop);
       this.pending.reset();
-      return assert.isRejected(res, 'Pending reset');
+      return assert.isRejected(res, 'Promise rejected by reset');
+    });
+
+    it('should reject pending promise with custom message', function () {
+      const res = this.pending.call(noop);
+      this.pending.reset('err');
+      return assert.isRejected(res, 'err');
     });
   });
 
@@ -207,7 +213,7 @@ describe('pending', function () {
     it('should reject after timeout', function () {
       const res = this.pending.call(noop, 10);
       setTimeout(() => this.pending.resolve('foo'), 20);
-      return assert.isRejected(res, 'Promise timeout: 10 ms');
+      return assert.isRejected(res, 'Promise rejected by timeout (10 ms)');
     });
   });
 });

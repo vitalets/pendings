@@ -139,10 +139,12 @@ class Pending {
 
   /**
    * Resets to initial state.
+   *
+   * @param {String} [msg='Pending reset'] custom rejection error message if promise is in pending state.
    */
-  reset() {
+  reset(msg) {
     if (this._isPending) {
-      this.reject(new Error('Pending reset'));
+      this.reject(new Error(msg || 'Promise rejected by reset'));
     }
     this._promise = null;
     this._isPending = false;

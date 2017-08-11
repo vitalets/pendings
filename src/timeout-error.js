@@ -10,7 +10,7 @@ class TimeoutError extends Error {
    * @param {Number} timeout
    */
   constructor(timeout) {
-    const message = `Promise timeout: ${timeout} ms`;
+    const message = `Promise rejected by timeout (${timeout} ms)`;
     super(message);
     this.timeout = timeout;
   }

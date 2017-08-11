@@ -195,19 +195,19 @@ describe('pendings', function () {
 
     it('should reject after timeout', function () {
       const res = this.pendings.set(1, noop, {timeout: 5});
-      return assert.isRejected(res, 'Promise timeout: 5 ms');
+      return assert.isRejected(res, 'Promise rejected by timeout (5 ms)');
     });
 
     it('should reject after default timeout', function () {
       const pendings = new Pendings({timeout: 5});
       const res = pendings.set(1, noop);
-      return assert.isRejected(res, 'Promise timeout: 5 ms');
+      return assert.isRejected(res, 'Promise rejected by timeout (5 ms)');
     });
 
     it('should overwrite default timeout', function () {
       const pendings = new Pendings({timeout: 10});
       const res = pendings.set(1, noop, {timeout: 5});
-      return assert.isRejected(res, 'Promise timeout: 5 ms');
+      return assert.isRejected(res, 'Promise rejected by timeout (5 ms)');
     });
   });
 
