@@ -174,7 +174,8 @@ class Pending {
 
   _callFn(fn) {
     try {
-      fn();
+      const res = fn();
+      this._proxyPromise(res);
     } catch (e) {
       this.reject(e);
     }
@@ -188,6 +189,12 @@ class Pending {
     if (this._timer) {
       clearTimeout(this._timer);
       this._timer = null;
+    }
+  }
+
+  _proxyPromise(p) {
+    if (p && typeof p.then === 'function') {
+      p.then(value => this.resolve(value), e => this.reject(e));
     }
   }
 }

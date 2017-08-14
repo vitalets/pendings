@@ -61,6 +61,16 @@ describe('pending', function () {
       this.pending.resolve('foo');
       return assert.eventually.equal(res, 'foo');
     });
+
+    it('should proxy resolve if fn returns promise', function () {
+      const res = this.pending.call(() => Promise.resolve('foo'));
+      return assert.eventually.equal(res, 'foo');
+    });
+
+    it('should proxy reject if fn returns promise', function () {
+      const res = this.pending.call(() => Promise.reject(new Error('err')));
+      return assert.isRejected(res, 'err');
+    });
   });
 
   describe('resolve', function () {
