@@ -104,15 +104,17 @@ class Foo {
 * [Pending](#Pending)
     * [new Pending()](#new_Pending_new)
     * [.promise](#Pending+promise) ⇒ <code>Promise</code>
+    * [.value](#Pending+value) ⇒ <code>\*</code>
     * [.isResolved](#Pending+isResolved) ⇒ <code>Boolean</code>
     * [.isRejected](#Pending+isRejected) ⇒ <code>Boolean</code>
     * [.isFulfilled](#Pending+isFulfilled) ⇒ <code>Boolean</code>
+    * [.isPending](#Pending+isPending) ⇒ <code>Boolean</code>
     * [.onFulfilled](#Pending+onFulfilled)
     * [.call(fn, [timeout])](#Pending+call) ⇒ <code>Promise</code>
     * [.resolve([value])](#Pending+resolve)
-    * [.reject([reason])](#Pending+reject)
-    * [.fulfill([value], [reason])](#Pending+fulfill)
-    * [.reset()](#Pending+reset)
+    * [.reject([value])](#Pending+reject)
+    * [.fulfill([resolveValue], [rejectValue])](#Pending+fulfill)
+    * [.reset([error])](#Pending+reset)
 
 <a name="new_Pending_new"></a>
 
@@ -123,6 +125,12 @@ Creates instance of single pending promise. It holds `resolve / reject` callback
 
 ### pending.promise ⇒ <code>Promise</code>
 Returns promise itself.
+
+**Kind**: instance property of [<code>Pending</code>](#Pending)  
+<a name="Pending+value"></a>
+
+### pending.value ⇒ <code>\*</code>
+Returns value with that promise was fulfilled (resolved or rejected).
 
 **Kind**: instance property of [<code>Pending</code>](#Pending)  
 <a name="Pending+isResolved"></a>
@@ -141,6 +149,12 @@ Returns true if promise rejected.
 
 ### pending.isFulfilled ⇒ <code>Boolean</code>
 Returns true if promise fulfilled (resolved or rejected).
+
+**Kind**: instance property of [<code>Pending</code>](#Pending)  
+<a name="Pending+isPending"></a>
+
+### pending.isPending ⇒ <code>Boolean</code>
+Returns true if promise is pending.
 
 **Kind**: instance property of [<code>Pending</code>](#Pending)  
 <a name="Pending+onFulfilled"></a>
@@ -183,33 +197,38 @@ Resolves pending promise with specified `value`.
 
 <a name="Pending+reject"></a>
 
-### pending.reject([reason])
-Rejects pending promise with specified `reason`.
-
-**Kind**: instance method of [<code>Pending</code>](#Pending)  
-
-| Param | Type |
-| --- | --- |
-| [reason] | <code>\*</code> | 
-
-<a name="Pending+fulfill"></a>
-
-### pending.fulfill([value], [reason])
-Helper method: rejects if `reason` is truthy, otherwise resolves with `value`.
+### pending.reject([value])
+Rejects pending promise with specified `value`.
 
 **Kind**: instance method of [<code>Pending</code>](#Pending)  
 
 | Param | Type |
 | --- | --- |
 | [value] | <code>\*</code> | 
-| [reason] | <code>\*</code> | 
+
+<a name="Pending+fulfill"></a>
+
+### pending.fulfill([resolveValue], [rejectValue])
+Helper method: rejects if `rejectValue` is truthy, otherwise resolves with `resolveValue`.
+
+**Kind**: instance method of [<code>Pending</code>](#Pending)  
+
+| Param | Type |
+| --- | --- |
+| [resolveValue] | <code>\*</code> | 
+| [rejectValue] | <code>\*</code> | 
 
 <a name="Pending+reset"></a>
 
-### pending.reset()
+### pending.reset([error])
 Resets to initial state.
 
 **Kind**: instance method of [<code>Pending</code>](#Pending)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| [error] | <code>Error</code> | custom rejection error if promise is in pending state. |
+
 <a name="Pendings"></a>
 
 ## Pendings
@@ -227,6 +246,7 @@ Resets to initial state.
     * [.tryReject(id, [reason])](#Pendings+tryReject)
     * [.tryFulfill(id, [value], [reason])](#Pendings+tryFulfill)
     * [.rejectAll([reason])](#Pendings+rejectAll)
+    * [.waitAll()](#Pendings+waitAll) ⇒ <code>Promise</code>
     * [.generateId()](#Pendings+generateId) ⇒ <code>String</code>
 
 <a name="new_Pendings_new"></a>
@@ -240,6 +260,7 @@ Creates dynamic list of promises. When each promise if fulfilled it is remove fr
 | [options] | <code>Object</code> |  |  |
 | [options.idPrefix] | <code>String</code> | <code>&#x27;&#x27;</code> | prefix for generated IDs |
 | [options.timeout] | <code>Number</code> | <code>0</code> | default timeout for all promises |
+| [options.persistent] | <code>Number</code> | <code>false</code> | should list keep promises after fulfillment |
 
 <a name="Pendings+add"></a>
 
@@ -368,6 +389,13 @@ Rejects all pending promises with specified `reason`. Useful for cleanup.
 | --- | --- |
 | [reason] | <code>\*</code> | 
 
+<a name="Pendings+waitAll"></a>
+
+### pendings.waitAll() ⇒ <code>Promise</code>
+Waits for all promises to fulfill and returns object with resolved/rejected values.
+
+**Kind**: instance method of [<code>Pendings</code>](#Pendings)  
+**Returns**: <code>Promise</code> - promise resolved with `{resolved: <Array>, rejected: <Array>}`  
 <a name="Pendings+generateId"></a>
 
 ### pendings.generateId() ⇒ <code>String</code>
