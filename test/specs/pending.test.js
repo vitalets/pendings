@@ -149,6 +149,29 @@ describe('pending', function () {
     });
   });
 
+  describe('isPending', function () {
+    it('should be false until call', function () {
+      assert.notOk(this.pending.isPending);
+    });
+
+    it('should be true after call', function () {
+      this.pending.call();
+      assert.ok(this.pending.isPending);
+    });
+
+    it('should be false after resolve', function () {
+      this.pending.call();
+      this.pending.resolve('foo');
+      assert.notOk(this.pending.isPending);
+    });
+
+    it('should be false after reject', function () {
+      this.pending.call().catch(() => {});
+      this.pending.reject('foo');
+      assert.notOk(this.pending.isPending);
+    });
+  });
+
   describe('isFulfilled', function () {
     it('should set after resolve', function () {
       assert.notOk(this.pending.isFulfilled);
@@ -220,6 +243,20 @@ describe('pending', function () {
       const res = this.pending.call(noop);
       this.pending.reset(new Error('err'));
       return assert.isRejected(res, 'err');
+    });
+  });
+
+  describe('value', function () {
+    it('should return resolved value', function () {
+      this.pending.call();
+      this.pending.resolve('foo');
+      assert.equal(this.pending.value, 'foo');
+    });
+
+    it('should return rejected value', function () {
+      this.pending.call().catch(() => {});
+      this.pending.reject('err');
+      assert.equal(this.pending.value, 'err');
     });
   });
 

@@ -198,13 +198,65 @@ describe('pendings', function () {
     });
   });
 
-  describe.skip('waitAllFulfilled', function () {
-    it('should return resolved and rejected promises', function () {
-      // const p1 = this.pendings.add(noop);
-      // const p2 = this.pendings.set(1, noop);
-      // this.pendings.rejectAll('err');
-      // const res = this.pendings.waitAllFulfilled();
-      // return assert.eventually.equal(res, 'foo');
+  describe('waitAll', function () {
+    it('should resolve with empty for empty list', function () {
+      const pendings = new Pendings();
+      const res = pendings.waitAll();
+      return assert.eventually.deepEqual(res, {resolved: {}, rejected: {}});
+    });
+
+    it('should resolve with empty result for persistent: false', function () {
+      const pendings = new Pendings({persistent: false});
+      pendings.set(1, noop);
+      pendings.set(2, noop);
+      pendings.set(3, noop).catch(() => {});
+      const res = pendings.waitAll();
+      pendings.resolve(1, 'foo');
+      setTimeout(() => pendings.resolve(2, 'foo2'), 10);
+      pendings.reject(3);
+      return assert.eventually.deepEqual(res, {resolved: {}, rejected: {}});
+    });
+
+    it('should resolve with resolved/rejected values for persistent: true', function () {
+      const pendings = new Pendings({persistent: true});
+      pendings.set(1, noop);
+      pendings.set(2, noop);
+      pendings.set(3, () => Promise.resolve('bar'));
+      pendings.set(4, noop).catch(() => {});
+      const res = pendings.waitAll();
+      pendings.resolve(1, 'foo');
+      pendings.reject(4, 'err');
+      setTimeout(() => pendings.resolve(2, 'foo2'), 10);
+      return assert.eventually.deepEqual(res, {
+        resolved: {
+          '1': 'foo',
+          '2': 'foo2',
+          '3': 'bar'
+        },
+        rejected: {
+          '4': 'err'
+        }
+      });
+    });
+
+    it('should accumulate resolved values for several calls', function () {
+      const pendings = new Pendings({persistent: true});
+      pendings.set(1, noop);
+      pendings.resolve(1, 'foo');
+      const p1 = pendings.waitAll();
+      pendings.set(2, noop);
+      pendings.resolve(2, 'bar');
+      const p2 = pendings.waitAll();
+      return Promise.all([
+        assert.eventually.deepEqual(p1, {
+          resolved: {'1': 'foo'},
+          rejected: {},
+        }),
+        assert.eventually.deepEqual(p2, {
+          resolved: {'1': 'foo', '2': 'bar'},
+          rejected: {},
+        }),
+      ]);
     });
   });
 

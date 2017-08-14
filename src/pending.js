@@ -18,6 +18,7 @@ class Pending {
     this._isPending = false;
     this._isResolved = false;
     this._isRejected = false;
+    this._value = undefined;
     this._promise = null;
     this._timer = null;
     this._onFulfilled = () => {};
@@ -30,6 +31,15 @@ class Pending {
    */
   get promise() {
     return this._promise;
+  }
+
+  /**
+   * Returns value with that promise was fulfilled (resolved or rejected).
+   *
+   * @returns {*}
+   */
+  get value() {
+    return this._value;
   }
 
   /**
@@ -57,6 +67,15 @@ class Pending {
    */
   get isFulfilled() {
     return this._isResolved || this._isRejected;
+  }
+
+  /**
+   * Returns true if promise is pending.
+   *
+   * @returns {Boolean}
+   */
+  get isPending() {
+    return this._isPending;
   }
 
   /**
@@ -102,6 +121,7 @@ class Pending {
     if (this._isPending) {
       this._isPending = false;
       this._isResolved = true;
+      this._value = value;
       this._clearTimer();
       this._resolve(value);
       this._onFulfilled(this);
@@ -109,31 +129,32 @@ class Pending {
   }
 
   /**
-   * Rejects pending promise with specified `reason`.
+   * Rejects pending promise with specified `value`.
    *
-   * @param {*} [reason]
+   * @param {*} [value]
    */
-  reject(reason) {
+  reject(value) {
     if (this._isPending) {
       this._isPending = false;
       this._isRejected = true;
+      this._value = value;
       this._clearTimer();
-      this._reject(reason);
+      this._reject(value);
       this._onFulfilled(this);
     }
   }
 
   /**
-   * Helper method: rejects if `reason` is truthy, otherwise resolves with `value`.
+   * Helper method: rejects if `rejectValue` is truthy, otherwise resolves with `resolveValue`.
    *
-   * @param {*} [value]
-   * @param {*} [reason]
+   * @param {*} [resolveValue]
+   * @param {*} [rejectValue]
    */
-  fulfill(value, reason) {
-    if (reason) {
-      this.reject(reason);
+  fulfill(resolveValue, rejectValue) {
+    if (rejectValue) {
+      this.reject(rejectValue);
     } else {
-      this.resolve(value);
+      this.resolve(resolveValue);
     }
   }
 
@@ -151,6 +172,7 @@ class Pending {
     this._isPending = false;
     this._isResolved = false;
     this._isRejected = false;
+    this._value = undefined;
     this._clearTimer();
   }
 

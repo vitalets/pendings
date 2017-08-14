@@ -24,6 +24,7 @@ class Pendings {
   constructor(options) {
     this._options = Object.assign({}, DEFAULT_OPTIONS, options);
     this._map = Object.create(null);
+    this._waitingAll = new Pending();
   }
 
   /**
@@ -163,6 +164,15 @@ class Pendings {
   }
 
   /**
+   * Waits for all promises to fulfill and returns object with resolved/rejected values.
+   *
+   * @returns {Promise} promise resolved with `{resolved: <Array>, rejected: <Array>}`
+   */
+  waitAll() {
+    return this._waitingAll.call(() => this._checkAllFulfilled());
+  }
+
+  /**
    * Generates unique ID. Can be overwritten.
    *
    * @returns {String}
@@ -175,10 +185,36 @@ class Pendings {
     if (!this._options.persistent) {
       delete this._map[id];
     }
+    if (this._waitingAll.isPending) {
+      this._checkAllFulfilled();
+    }
   }
 
   _getTimeout(options) {
     return options && options.timeout !== undefined ? options.timeout : this._options.timeout;
+  }
+
+  _checkAllFulfilled() {
+    const allFulfilled = Object.keys(this._map).every(id => this._map[id].isFulfilled);
+    if (allFulfilled) {
+      const result = this._getAllValues();
+      this._waitingAll.resolve(result);
+      this._waitingAll.reset();
+    }
+  }
+
+  _getAllValues() {
+    const resolved = {};
+    const rejected = {};
+    Object.keys(this._map).forEach(id => {
+      const pending = this._map[id];
+      if (pending.isResolved) {
+        resolved[id] = pending.value;
+      } else {
+        rejected[id] = pending.value;
+      }
+    });
+    return {resolved, rejected};
   }
 }
 
