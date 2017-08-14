@@ -186,7 +186,36 @@ describe('pendings', function () {
     });
   });
 
-  describe('timeout', function () {
+  describe('rejectAll', function () {
+    it('should reject all promises', function () {
+      const p1 = this.pendings.add(noop);
+      const p2 = this.pendings.set(1, noop);
+      this.pendings.rejectAll('err');
+      return Promise.all([
+        assert.isRejected(p1, 'err'),
+        assert.isRejected(p2, 'err'),
+      ]);
+    });
+  });
+
+  describe.skip('waitAllFulfilled', function () {
+    it('should return resolved and rejected promises', function () {
+      // const p1 = this.pendings.add(noop);
+      // const p2 = this.pendings.set(1, noop);
+      // this.pendings.rejectAll('err');
+      // const res = this.pendings.waitAllFulfilled();
+      // return assert.eventually.equal(res, 'foo');
+    });
+  });
+
+  describe('generateId', function () {
+    it('should change generated ids', function () {
+      this.pendings.generateId = () => 1;
+      this.pendings.add(id => assert.equal(id, 1));
+    });
+  });
+
+  describe('options: timeout', function () {
     it('should resolve before timeout', function () {
       const res = this.pendings.set(1, noop, {timeout: 10});
       setTimeout(() => this.pendings.resolve(1, 'foo'), 5);
@@ -211,44 +240,45 @@ describe('pendings', function () {
     });
   });
 
-  describe('rejectAll', function () {
-    it('should reject all promises', function () {
-      const p1 = this.pendings.add(noop);
-      const p2 = this.pendings.set(1, noop);
-      this.pendings.rejectAll('err');
-      return Promise.all([
-        assert.isRejected(p1, 'err'),
-        assert.isRejected(p2, 'err'),
-      ]);
+  describe('options: idPrefix', function () {
+    it('should set idPrefix', function () {
+      let id;
+      const pendings = new Pendings({idPrefix: 'client1'});
+      pendings.add(_id => id = _id);
+      assert.equal(id.indexOf('client1'), 0);
     });
   });
 
-  it('should overwrite generateId method', function () {
-    this.pendings.generateId = () => 1;
-    this.pendings.add(id => assert.equal(id, 1));
+  describe('options: persistent', function () {
+    it('should not store fulfilled pendings for persistent = false', function () {
+      const pendings = new Pendings({persistent: false});
+      pendings.set(1, noop);
+      pendings.set(2, noop).catch(() => {});
+      pendings.set(3, noop);
+      pendings.resolve(1);
+      pendings.reject(2);
+      assert.equal(Object.keys(pendings._map).length, 1);
+    });
+
+    it('should store fulfilled pendings for persistent = true', function () {
+      const pendings = new Pendings({persistent: true});
+      pendings.set(1, noop);
+      pendings.set(2, noop).catch(() => {});
+      pendings.set(3, noop);
+      pendings.resolve(1);
+      pendings.reject(2);
+      assert.equal(Object.keys(pendings._map).length, 3);
+    });
   });
 
-  it('should set idPrefix', function () {
-    let id;
-    const pendings = new Pendings({idPrefix: 'client1'});
-    pendings.add(_id => id = _id);
-    assert.equal(id.indexOf('client1'), 0);
+  describe('exports', function () {
+    it('should export Pending', function () {
+      assert.ok(Pendings.Pending);
+    });
+
+    it('should export TimeoutError', function () {
+      assert.ok(Pendings.TimeoutError);
+    });
   });
 
-  it('should export Pending', function () {
-    assert.ok(Pendings.Pending);
-  });
-
-  it('should export TimeoutError', function () {
-    assert.ok(Pendings.TimeoutError);
-  });
-
-  it('should not store fulfilled pendings', function () {
-    this.pendings.set(1, noop);
-    this.pendings.set(2, noop).catch(() => {});
-    this.pendings.set(3, noop);
-    this.pendings.resolve(1);
-    this.pendings.reject(2);
-    assert.equal(Object.keys(this.pendings._map).length, 1);
-  });
 });

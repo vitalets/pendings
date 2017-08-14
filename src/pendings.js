@@ -6,6 +6,12 @@
 
 const Pending = require('./pending');
 
+const DEFAULT_OPTIONS = {
+  idPrefix: '',
+  persistent: false,
+  timeout: 0,
+};
+
 class Pendings {
   /**
    * Creates dynamic list of promises. When each promise if fulfilled it is remove from list.
@@ -13,11 +19,10 @@ class Pendings {
    * @param {Object} [options]
    * @param {String} [options.idPrefix=''] prefix for generated IDs
    * @param {Number} [options.timeout=0] default timeout for all promises
+   * @param {Number} [options.persistent=false] should list keep promises after fulfillment
    */
   constructor(options) {
-    options = options || {};
-    this._timeout = options.timeout || 0;
-    this._idPrefix = options.idPrefix || '';
+    this._options = Object.assign({}, DEFAULT_OPTIONS, options);
     this._map = Object.create(null);
   }
 
@@ -50,7 +55,7 @@ class Pendings {
     } else {
       const pending = this._map[id] = new Pending();
       const timeout = this._getTimeout(options);
-      pending.onFulfilled = () => delete this._map[id];
+      pending.onFulfilled = () => this._onFulfilled(id);
       return pending.call(() => fn(id), timeout);
     }
   }
@@ -163,12 +168,17 @@ class Pendings {
    * @returns {String}
    */
   generateId() {
-    return `${this._idPrefix}${Date.now()}-${Math.random()}`;
+    return `${this._options.idPrefix}${Date.now()}-${Math.random()}`;
+  }
+
+  _onFulfilled(id) {
+    if (!this._options.persistent) {
+      delete this._map[id];
+    }
   }
 
   _getTimeout(options) {
-    options = options || {};
-    return options.timeout !== undefined ? options.timeout : this._timeout;
+    return options && options.timeout !== undefined ? options.timeout : this._options.timeout;
   }
 }
 
