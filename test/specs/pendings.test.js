@@ -9,6 +9,20 @@ describe('pendings', function () {
     this.pendings = new Pendings();
   });
 
+  describe('exports', function () {
+    it('should export Pendings', function () {
+      assert.isFunction(Pendings);
+    });
+
+    it('should export Pending', function () {
+      assert.isFunction(Pendings.Pending);
+    });
+
+    it('should export TimeoutError', function () {
+      assert.isFunction(Pendings.TimeoutError);
+    });
+  });
+
   describe('add', function () {
     it('should return Promise', function () {
       const res = this.pendings.add(noop);
@@ -198,6 +212,30 @@ describe('pendings', function () {
     });
   });
 
+  describe('clear', function () {
+    it('should remove all promises from list', function () {
+      const pendings = new Pendings({persistent: true});
+      pendings.add(noop);
+      pendings.set(1, noop);
+      pendings.set(2, noop).catch(() => {});
+      pendings.resolve(1, 'foo');
+      pendings.reject(2, 'err');
+      assert.equal(pendings.count, 3);
+      pendings.clear();
+      assert.equal(pendings.count, 0);
+    });
+
+    it('should resolve waitAll with empty result', function () {
+      const pendings = new Pendings({persistent: true});
+      pendings.add(noop);
+      pendings.set(1, noop);
+      pendings.set(2, noop).catch(() => {});
+      const res = pendings.waitAll();
+      pendings.clear();
+      return assert.eventually.deepEqual(res, {resolved: {}, rejected: {}});
+    });
+  });
+
   describe('waitAll', function () {
     it('should resolve with empty for empty list', function () {
       const pendings = new Pendings();
@@ -260,6 +298,20 @@ describe('pendings', function () {
     });
   });
 
+  describe('count', function () {
+    it('should return count of promises', function () {
+      assert.equal(this.pendings.count, 0);
+      this.pendings.set(1, noop);
+      assert.equal(this.pendings.count, 1);
+      this.pendings.set(2, noop).catch(() => {});
+      assert.equal(this.pendings.count, 2);
+      this.pendings.resolve(1);
+      assert.equal(this.pendings.count, 1);
+      this.pendings.reject(2);
+      assert.equal(this.pendings.count, 0);
+    });
+  });
+
   describe('generateId', function () {
     it('should change generated ids', function () {
       this.pendings.generateId = () => 1;
@@ -309,7 +361,7 @@ describe('pendings', function () {
       pendings.set(3, noop);
       pendings.resolve(1);
       pendings.reject(2);
-      assert.equal(Object.keys(pendings._map).length, 1);
+      assert.equal(pendings.count, 1);
     });
 
     it('should store fulfilled pendings for persistent = true', function () {
@@ -319,18 +371,7 @@ describe('pendings', function () {
       pendings.set(3, noop);
       pendings.resolve(1);
       pendings.reject(2);
-      assert.equal(Object.keys(pendings._map).length, 3);
+      assert.equal(pendings.count, 3);
     });
   });
-
-  describe('exports', function () {
-    it('should export Pending', function () {
-      assert.ok(Pendings.Pending);
-    });
-
-    it('should export TimeoutError', function () {
-      assert.ok(Pendings.TimeoutError);
-    });
-  });
-
 });

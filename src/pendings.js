@@ -28,6 +28,15 @@ class Pendings {
   }
 
   /**
+   * Returns count of pending / fulfilled promises in the list.
+   *
+   * @returns {Number}
+   */
+  get count() {
+    return Object.keys(this._map).length;
+  }
+
+  /**
    * Calls `fn` and returns new promise. `fn` gets generated unique `id` as parameter.
    *
    * @param {Function} fn
@@ -170,6 +179,17 @@ class Pendings {
    */
   waitAll() {
     return this._waitingAll.call(() => this._checkAllFulfilled());
+  }
+
+  /**
+   * Removes all items from list.
+   * If there is waitAll promise - it will be resolved with empty results.
+   */
+  clear() {
+    this._map = Object.create(null);
+    if (this._waitingAll.isPending) {
+      this._checkAllFulfilled();
+    }
   }
 
   /**
