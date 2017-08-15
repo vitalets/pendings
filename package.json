@@ -1,7 +1,7 @@
 {
   "name": "pendings",
   "version": "0.2.5",
-  "description": "Better control of pending promises",
+  "description": "Better control of promises",
   "author": {
     "name": "Vitaliy Potapov",
     "email": "noginsk@rambler.ru"
