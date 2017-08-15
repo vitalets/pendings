@@ -7,9 +7,9 @@
 const Pending = require('./pending');
 
 const DEFAULT_OPTIONS = {
-  idPrefix: '',
-  persistent: false,
+  autoRemove: false,
   timeout: 0,
+  idPrefix: '',
 };
 
 class Pendings {
@@ -17,9 +17,9 @@ class Pendings {
    * Creates dynamic list of promises. When each promise if fulfilled it is remove from list.
    *
    * @param {Object} [options]
-   * @param {String} [options.idPrefix=''] prefix for generated IDs
+   * @param {Number} [options.autoRemove=false] automatically remove fulfilled promises
    * @param {Number} [options.timeout=0] default timeout for all promises
-   * @param {Number} [options.persistent=false] should list keep promises after fulfillment
+   * @param {String} [options.idPrefix=''] prefix for generated IDs
    */
   constructor(options) {
     this._options = Object.assign({}, DEFAULT_OPTIONS, options);
@@ -71,7 +71,7 @@ class Pendings {
   }
 
   /**
-   * Checks if promise with specified `id` is pending.
+   * Checks if promise with specified `id` is exists in the list.
    *
    * @param {String} id
    * @returns {Boolean}
@@ -96,15 +96,15 @@ class Pendings {
   }
 
   /**
-   * Rejects pending promise by `id` with specified `reason`.
+   * Rejects pending promise by `id` with specified `value`.
    * Throws if promise does not exist or is already fulfilled.
    *
    * @param {String} id
-   * @param {*} [reason]
+   * @param {*} [value]
    */
-  reject(id, reason) {
+  reject(id, value) {
     if (this.has(id)) {
-      this._map[id].reject(reason);
+      this._map[id].reject(value);
     } else {
       throw createNoPendingError(id);
     }
@@ -115,12 +115,12 @@ class Pendings {
    * Throws if promise does not exist or is already fulfilled.
    *
    * @param {String} id
-   * @param {*} [value]
-   * @param {*} [reason]
+   * @param {*} [resolveValue]
+   * @param {*} [rejectValue]
    */
-  fulfill(id, value, reason) {
+  fulfill(id, resolveValue, rejectValue) {
     if (this.has(id)) {
-      this._map[id].fulfill(value, reason);
+      this._map[id].fulfill(resolveValue, rejectValue);
     } else {
       throw createNoPendingError(id);
     }
@@ -139,14 +139,14 @@ class Pendings {
   }
 
   /**
-   * Rejects pending promise by `id` with specified `reason` if it exists.
+   * Rejects pending promise by `id` with specified `value` if it exists.
    *
    * @param {String} id
-   * @param {*} [reason]
+   * @param {*} [value]
    */
-  tryReject(id, reason) {
+  tryReject(id, value) {
     if (this.has(id)) {
-      this._map[id].reject(reason);
+      this._map[id].reject(value);
     }
   }
 
@@ -154,22 +154,22 @@ class Pendings {
    * Rejects pending promise by `id` if `reason` is truthy, otherwise resolves with `value`.
    *
    * @param {String} id
-   * @param {*} [value]
-   * @param {*} [reason]
+   * @param {*} [resolveValue]
+   * @param {*} [rejectValue]
    */
-  tryFulfill(id, value, reason) {
+  tryFulfill(id, resolveValue, rejectValue) {
     if (this.has(id)) {
-      this._map[id].fulfill(value, reason);
+      this._map[id].fulfill(resolveValue, rejectValue);
     }
   }
 
   /**
-   * Rejects all pending promises with specified `reason`. Useful for cleanup.
+   * Rejects all pending promises with specified `value`. Useful for cleanup.
    *
-   * @param {*} [reason]
+   * @param {*} [value]
    */
-  rejectAll(reason) {
-    Object.keys(this._map).forEach(id => this.tryReject(id, reason));
+  rejectAll(value) {
+    Object.keys(this._map).forEach(id => this.tryReject(id, value));
   }
 
   /**
@@ -202,7 +202,7 @@ class Pendings {
   }
 
   _onFulfilled(id) {
-    if (!this._options.persistent) {
+    if (this._options.autoRemove) {
       delete this._map[id];
     }
     if (this._waitingAll.isPending) {
@@ -224,17 +224,12 @@ class Pendings {
   }
 
   _getAllValues() {
-    const resolved = {};
-    const rejected = {};
+    const result = {resolved: {}, rejected: {}};
     Object.keys(this._map).forEach(id => {
       const pending = this._map[id];
-      if (pending.isResolved) {
-        resolved[id] = pending.value;
-      } else {
-        rejected[id] = pending.value;
-      }
+      result[pending.isResolved ? 'resolved' : 'rejected'][id] = pending.value;
     });
-    return {resolved, rejected};
+    return result;
   }
 }
 
