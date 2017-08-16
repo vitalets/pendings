@@ -175,7 +175,7 @@ class Pendings {
   /**
    * Waits for all promises to fulfill and returns object with resolved/rejected values.
    *
-   * @returns {Promise} promise resolved with `{resolved: <Array>, rejected: <Array>}`
+   * @returns {Promise} promise resolved with object `{resolved: {id: value, ...}, rejected: {id: value, ...}}`
    */
   waitAll() {
     return this._waitingAll.call(() => this._checkAllFulfilled());

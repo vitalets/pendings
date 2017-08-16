@@ -403,7 +403,7 @@ Rejects all pending promises with specified `value`. Useful for cleanup.
 Waits for all promises to fulfill and returns object with resolved/rejected values.
 
 **Kind**: instance method of [<code>Pendings</code>](#Pendings)  
-**Returns**: <code>Promise</code> - promise resolved with `{resolved: <Array>, rejected: <Array>}`  
+**Returns**: <code>Promise</code> - promise resolved with object `{resolved: {id: value, ...}, rejected: {id: value, ...}}`  
 <a name="Pendings+clear"></a>
 
 ### pendings.clear()
