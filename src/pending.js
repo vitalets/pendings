@@ -197,7 +197,7 @@ class Pending {
   _callFn(fn) {
     try {
       const res = fn();
-      this._proxyPromise(res);
+      this._proxyFnPromise(res);
     } catch (e) {
       this.reject(e);
     }
@@ -214,7 +214,7 @@ class Pending {
     }
   }
 
-  _proxyPromise(p) {
+  _proxyFnPromise(p) {
     if (p && typeof p.then === 'function') {
       p.then(value => this.resolve(value), e => this.reject(e));
     }
