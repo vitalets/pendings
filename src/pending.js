@@ -5,12 +5,20 @@
 'use strict';
 
 const TimeoutError = require('./timeout-error');
+const {mergeOptions} = require('./utils');
+
+const DEFAULT_OPTIONS = {
+  timeout: 0,
+};
 
 class Pending {
   /**
    * Creates instance of single pending promise. It holds `resolve / reject` callbacks for future fulfillment.
+   * @param {Object} [options]
+   * @param {Number} [options.timeout]
    */
-  constructor() {
+  constructor(options) {
+    this._options = mergeOptions(DEFAULT_OPTIONS, options);
     this._resolve = null;
     this._reject = null;
     // it seems that isPending can be calculated as `Boolean(this._promise) && !this.isFulfilled`,
@@ -95,19 +103,22 @@ class Pending {
    * For the first time this method calls `fn` and returns new promise. Also holds `resolve` / `reject` callbacks
    * to allow fulfill promise via `pending.resolve()` and `pending.reject()`. All subsequent calls of `.call(fn)`
    * will return the same promise, which can be still pending or already fulfilled.
-   * To reset this behavior use `.reset()`. If `timeout` is specified, the promise will be automatically rejected
-   * after `timeout` milliseconds with `PendingTimeoutError`.
+   * To reset this behavior use `.reset()`. If `options.timeout` is specified, the promise will be automatically
+   * rejected after `timeout` milliseconds with `TimeoutError`.
    *
    * @param {Function} fn
-   * @param {Number} [timeout=0]
+   * @param {Object} [options]
+   * @param {Number} [options.timeout=0] timeout after which promise will be automatically rejected
    * @returns {Promise}
    */
-  call(fn, timeout) {
+  call(fn, options) {
     if (this._isPending || this.isFulfilled) {
       return this._promise;
     } else {
       this.reset();
-      this._createPromise(fn, timeout);
+      this._callOptions = mergeOptions(this._options, options);
+      this._initPromise(fn);
+      this._initTimer();
       return this._promise;
     }
   }
@@ -119,12 +130,11 @@ class Pending {
    */
   resolve(value) {
     if (this._isPending) {
-      this._isPending = false;
+      this._preFulfill();
       this._isResolved = true;
       this._value = value;
-      this._clearTimer();
       this._resolve(value);
-      this._onFulfilled(this);
+      this._postFulfill();
     }
   }
 
@@ -135,12 +145,11 @@ class Pending {
    */
   reject(value) {
     if (this._isPending) {
-      this._isPending = false;
+      this._preFulfill();
       this._isRejected = true;
       this._value = value;
-      this._clearTimer();
       this._reject(value);
-      this._onFulfilled(this);
+      this._postFulfill();
     }
   }
 
@@ -176,13 +185,6 @@ class Pending {
     this._clearTimer();
   }
 
-  _createPromise(fn, timeout) {
-    this._initPromise(fn);
-    if (timeout) {
-      this._initTimer(timeout);
-    }
-  }
-
   _initPromise(fn) {
     this._promise = new Promise((resolve, reject) => {
       this._isPending = true;
@@ -194,17 +196,11 @@ class Pending {
     });
   }
 
-  _callFn(fn) {
-    try {
-      const res = fn();
-      this._proxyFnPromise(res);
-    } catch (e) {
-      this.reject(e);
+  _initTimer() {
+    const timeout = this._callOptions.timeout;
+    if (timeout) {
+      this._timer = setTimeout(() => this.reject(new TimeoutError(timeout)), timeout);
     }
-  }
-
-  _initTimer(timeout) {
-    this._timer = setTimeout(() => this.reject(new TimeoutError(timeout)), timeout);
   }
 
   _clearTimer() {
@@ -214,10 +210,28 @@ class Pending {
     }
   }
 
-  _proxyFnPromise(p) {
+  _callFn(fn) {
+    try {
+      const res = fn();
+      this._attachToFnPromise(res);
+    } catch (e) {
+      this.reject(e);
+    }
+  }
+
+  _attachToFnPromise(p) {
     if (p && typeof p.then === 'function') {
       p.then(value => this.resolve(value), e => this.reject(e));
     }
+  }
+
+  _preFulfill() {
+    this._isPending = false;
+    this._clearTimer();
+  }
+
+  _postFulfill() {
+    this._onFulfilled(this);
   }
 }
 

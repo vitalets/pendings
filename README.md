@@ -4,16 +4,22 @@
 [![npm](https://img.shields.io/npm/v/pendings.svg)](https://www.npmjs.com/package/pendings)
 [![license](https://img.shields.io/npm/l/pendings.svg)](https://www.npmjs.com/package/pendings)
 
-> Better control of [Promises](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise)
+> Better control of [Promises]
 
-*Pendings* is a library for more flexible control over promises. It is useful in event-based code
-where you need to manually store `resolve` / `reject` callbacks for later fulfillment.
+*Pendings* is a wrapping library over [Promises] providing flexible control of promise lifecycle. 
+It is useful for event-based code where you need to manually store `resolve` / `reject` callbacks for later fulfillment.
 It reduces boilerplate code and allows to split business logic from promise manipulation.
 
 ## Installation
 ```bash
 npm install pendings --save
 ```
+
+## Features
+* automatically store `resolve` / `reject` callbacks for later fulfillment
+* automatically return existing promise for several calls until promise is fulfilled
+* automatic reject promise after configured `timeout`
+* convenient manipulation with list of promises: dynamic insert and `waitAll()` method 
 
 ## Usage (single promise)
 Typical situation with promises in event-based code:
@@ -102,7 +108,7 @@ class Foo {
 **Kind**: global class  
 
 * [Pending](#Pending)
-    * [new Pending()](#new_Pending_new)
+    * [new Pending([options])](#new_Pending_new)
     * [.promise](#Pending+promise) ⇒ <code>Promise</code>
     * [.value](#Pending+value) ⇒ <code>\*</code>
     * [.isResolved](#Pending+isResolved) ⇒ <code>Boolean</code>
@@ -110,7 +116,7 @@ class Foo {
     * [.isFulfilled](#Pending+isFulfilled) ⇒ <code>Boolean</code>
     * [.isPending](#Pending+isPending) ⇒ <code>Boolean</code>
     * [.onFulfilled](#Pending+onFulfilled)
-    * [.call(fn, [timeout])](#Pending+call) ⇒ <code>Promise</code>
+    * [.call(fn, [options])](#Pending+call) ⇒ <code>Promise</code>
     * [.resolve([value])](#Pending+resolve)
     * [.reject([value])](#Pending+reject)
     * [.fulfill([resolveValue], [rejectValue])](#Pending+fulfill)
@@ -118,8 +124,14 @@ class Foo {
 
 <a name="new_Pending_new"></a>
 
-### new Pending()
+### new Pending([options])
 Creates instance of single pending promise. It holds `resolve / reject` callbacks for future fulfillment.
+
+
+| Param | Type |
+| --- | --- |
+| [options] | <code>Object</code> | 
+| [options.timeout] | <code>Number</code> | 
 
 <a name="Pending+promise"></a>
 
@@ -170,19 +182,20 @@ Callback called when promise is fulfilled (resolved or rejected).
 
 <a name="Pending+call"></a>
 
-### pending.call(fn, [timeout]) ⇒ <code>Promise</code>
+### pending.call(fn, [options]) ⇒ <code>Promise</code>
 For the first time this method calls `fn` and returns new promise. Also holds `resolve` / `reject` callbacks
 to allow fulfill promise via `pending.resolve()` and `pending.reject()`. All subsequent calls of `.call(fn)`
 will return the same promise, which can be still pending or already fulfilled.
-To reset this behavior use `.reset()`. If `timeout` is specified, the promise will be automatically rejected
-after `timeout` milliseconds with `PendingTimeoutError`.
+To reset this behavior use `.reset()`. If `options.timeout` is specified, the promise will be automatically
+rejected after `timeout` milliseconds with `TimeoutError`.
 
 **Kind**: instance method of [<code>Pending</code>](#Pending)  
 
-| Param | Type | Default |
-| --- | --- | --- |
-| fn | <code>function</code> |  | 
-| [timeout] | <code>Number</code> | <code>0</code> | 
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| fn | <code>function</code> |  |  |
+| [options] | <code>Object</code> |  |  |
+| [options.timeout] | <code>Number</code> | <code>0</code> | timeout after which promise will be automatically rejected |
 
 <a name="Pending+resolve"></a>
 
@@ -254,15 +267,15 @@ Resets to initial state.
 <a name="new_Pendings_new"></a>
 
 ### new Pendings([options])
-Creates dynamic list of promises. When each promise if fulfilled it is remove from list.
+Manipulation of list of promises.
 
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | [options] | <code>Object</code> |  |  |
-| [options.autoRemove] | <code>Number</code> | <code>false</code> | automatically remove fulfilled promises |
+| [options.autoRemove] | <code>Number</code> | <code>false</code> | automatically remove fulfilled promises from list |
 | [options.timeout] | <code>Number</code> | <code>0</code> | default timeout for all promises |
-| [options.idPrefix] | <code>String</code> | <code>&#x27;&#x27;</code> | prefix for generated IDs |
+| [options.idPrefix] | <code>String</code> | <code>&#x27;&#x27;</code> | prefix for generated promise IDs |
 
 <a name="Pendings+count"></a>
 
@@ -291,12 +304,12 @@ If promise with such `id` already pending - it will be returned.
 
 **Kind**: instance method of [<code>Pendings</code>](#Pendings)  
 
-| Param | Type | Description |
-| --- | --- | --- |
-| id | <code>String</code> |  |
-| fn | <code>function</code> |  |
-| [options] | <code>Object</code> |  |
-| [options.timeout] | <code>Number</code> | custom timeout for particular promise |
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| id | <code>String</code> |  |  |
+| fn | <code>function</code> |  |  |
+| [options] | <code>Object</code> |  |  |
+| [options.timeout] | <code>Number</code> | <code>0</code> | custom timeout for particular promise |
 
 <a name="Pendings+has"></a>
 
@@ -434,3 +447,5 @@ Timeout error for pending promise.
 
 ## License
 MIT @ [Vitaliy Potapov](https://github.com/vitalets)
+
+[Promises]: https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise

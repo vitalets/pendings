@@ -4,16 +4,22 @@
 [![npm](https://img.shields.io/npm/v/pendings.svg)](https://www.npmjs.com/package/pendings)
 [![license](https://img.shields.io/npm/l/pendings.svg)](https://www.npmjs.com/package/pendings)
 
-> Better control of [Promises](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise)
+> Better control of [Promises]
 
-*Pendings* is a library for more flexible control over promises. It is useful in event-based code
-where you need to manually store `resolve` / `reject` callbacks for later fulfillment.
+*Pendings* is a wrapping library over [Promises] providing flexible control of promise lifecycle. 
+It is useful for event-based code where you need to manually store `resolve` / `reject` callbacks for later fulfillment.
 It reduces boilerplate code and allows to split business logic from promise manipulation.
 
 ## Installation
 ```bash
 npm install pendings --save
 ```
+
+## Features
+* automatically store `resolve` / `reject` callbacks for later fulfillment
+* automatically return existing promise for several calls until promise is fulfilled
+* automatic reject promise after configured `timeout`
+* convenient manipulation with list of promises: dynamic insert and `waitAll()` method 
 
 ## Usage (single promise)
 Typical situation with promises in event-based code:
@@ -89,3 +95,5 @@ class Foo {
 
 ## License
 MIT @ [Vitaliy Potapov](https://github.com/vitalets)
+
+[Promises]: https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise

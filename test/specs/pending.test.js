@@ -260,17 +260,47 @@ describe('pending', function () {
     });
   });
 
-  describe('timeout', function () {
+  describe('constructor options: timeout', function () {
     it('should resolve before timeout', function () {
-      const res = this.pending.call(noop, 10);
+      this.pending = new Pending({timeout: 10});
+      const res = this.pending.call(noop);
       setTimeout(() => this.pending.resolve('foo'), 5);
       return assert.eventually.equal(res, 'foo');
     });
 
     it('should reject after timeout', function () {
-      const res = this.pending.call(noop, 10);
+      this.pending = new Pending({timeout: 10});
+      const res = this.pending.call(noop);
       setTimeout(() => this.pending.resolve('foo'), 20);
       return assert.isRejected(res, 'Promise rejected by timeout (10 ms)');
+    });
+  });
+
+  describe('call options: timeout', function () {
+    it('should resolve before timeout', function () {
+      const res = this.pending.call(noop, {timeout: 10});
+      setTimeout(() => this.pending.resolve('foo'), 5);
+      return assert.eventually.equal(res, 'foo');
+    });
+
+    it('should reject after timeout', function () {
+      const res = this.pending.call(noop, {timeout: 10});
+      setTimeout(() => this.pending.resolve('foo'), 20);
+      return assert.isRejected(res, 'Promise rejected by timeout (10 ms)');
+    });
+
+    it('should overwrite default timeout', function () {
+      this.pending = new Pending({timeout: 10});
+      const res = this.pending.call(noop, {timeout: 20});
+      setTimeout(() => this.pending.resolve('foo'), 15);
+      return assert.eventually.equal(res, 'foo');
+    });
+
+    it('should not overwrite default timeout with undefined', function () {
+      this.pending = new Pending({timeout: 10});
+      const res = this.pending.call(noop, {timeout: undefined});
+      setTimeout(() => this.pending.resolve('foo'), 5);
+      return assert.eventually.equal(res, 'foo');
     });
   });
 });

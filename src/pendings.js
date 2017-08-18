@@ -5,6 +5,7 @@
 'use strict';
 
 const Pending = require('./pending');
+const {mergeOptions} = require('./utils');
 
 const DEFAULT_OPTIONS = {
   autoRemove: false,
@@ -14,15 +15,15 @@ const DEFAULT_OPTIONS = {
 
 class Pendings {
   /**
-   * Creates dynamic list of promises. When each promise if fulfilled it is remove from list.
+   * Manipulation of list of promises.
    *
    * @param {Object} [options]
-   * @param {Number} [options.autoRemove=false] automatically remove fulfilled promises
+   * @param {Number} [options.autoRemove=false] automatically remove fulfilled promises from list
    * @param {Number} [options.timeout=0] default timeout for all promises
-   * @param {String} [options.idPrefix=''] prefix for generated IDs
+   * @param {String} [options.idPrefix=''] prefix for generated promise IDs
    */
   constructor(options) {
-    this._options = Object.assign({}, DEFAULT_OPTIONS, options);
+    this._options = mergeOptions(DEFAULT_OPTIONS, options);
     this._map = Object.create(null);
     this._waitingAll = new Pending();
   }
@@ -56,17 +57,17 @@ class Pendings {
    * @param {String} id
    * @param {Function} fn
    * @param {Object} [options]
-   * @param {Number} [options.timeout] custom timeout for particular promise
+   * @param {Number} [options.timeout=0] custom timeout for particular promise
    * @returns {Promise}
    */
   set(id, fn, options) {
     if (this.has(id)) {
       return this._map[id].promise;
     } else {
-      const pending = this._map[id] = new Pending();
-      const timeout = this._getTimeout(options);
+      const {timeout} = mergeOptions(this._options, options);
+      const pending = this._map[id] = new Pending({timeout});
       pending.onFulfilled = () => this._onFulfilled(id);
-      return pending.call(() => fn(id), timeout);
+      return pending.call(() => fn(id));
     }
   }
 
