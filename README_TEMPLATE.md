@@ -17,9 +17,9 @@ npm install pendings --save
 
 ## Features
 * automatically store `resolve` / `reject` callbacks for later fulfillment
-* automatically return existing promise for several calls until promise is fulfilled
+* automatically return existing promise for all calls until promise is fulfilled
 * automatic reject promise after configured `timeout`
-* convenient manipulation with list of promises: dynamic insert and `waitAll()` method 
+* flexible manipulation with list of promises: dynamic insert and `waitAll()` method
 
 ## Usage (single promise)
 Typical situation with promises in event-based code:

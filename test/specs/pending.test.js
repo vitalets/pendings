@@ -303,4 +303,75 @@ describe('pending', function () {
       return assert.eventually.equal(res, 'foo');
     });
   });
+
+  describe('constructor options: autoReset', function () {
+    describe('never', function () {
+      it('should keep promise on next calls after resolve', function () {
+        this.pending = new Pending({autoReset: 'never'});
+        const p = this.pending.call();
+        this.pending.resolve();
+        assert.equal(p, this.pending.call());
+      });
+
+      it('should keep promise on next calls after reject', function () {
+        this.pending = new Pending({autoReset: 'never'});
+        const p = this.pending.call();
+        p.catch(() => {});
+        this.pending.reject();
+        assert.equal(p, this.pending.call());
+      });
+    });
+
+    describe('resolved', function () {
+      it('should not keep promise on next calls after resolve', function () {
+        this.pending = new Pending({autoReset: 'resolved'});
+        const p = this.pending.call();
+        this.pending.resolve();
+        assert.notEqual(p, this.pending.call());
+      });
+
+      it('should keep promise on next calls after reject', function () {
+        this.pending = new Pending({autoReset: 'resolved'});
+        const p = this.pending.call();
+        p.catch(() => {});
+        this.pending.reject();
+        assert.equal(p, this.pending.call());
+      });
+    });
+
+    describe('rejected', function () {
+      it('should keep promise on next calls after resolve', function () {
+        this.pending = new Pending({autoReset: 'rejected'});
+        const p = this.pending.call();
+        this.pending.resolve();
+        assert.equal(p, this.pending.call());
+      });
+
+      it('should not keep promise on next calls after reject', function () {
+        this.pending = new Pending({autoReset: 'rejected'});
+        const p = this.pending.call();
+        p.catch(() => {});
+        this.pending.reject();
+        assert.notEqual(p, this.pending.call());
+      });
+    });
+
+    describe('fulfilled', function () {
+      it('should not keep promise on next calls after resolve', function () {
+        this.pending = new Pending({autoReset: 'fulfilled'});
+        const p = this.pending.call();
+        this.pending.resolve();
+        assert.notEqual(p, this.pending.call());
+      });
+
+      it('should not keep promise on next calls after reject', function () {
+        this.pending = new Pending({autoReset: 'fulfilled'});
+        const p = this.pending.call();
+        p.catch(() => {});
+        this.pending.reject();
+        assert.notEqual(p, this.pending.call());
+      });
+    });
+
+  });
 });

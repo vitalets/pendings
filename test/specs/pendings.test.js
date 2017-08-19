@@ -157,6 +157,7 @@ describe('pendings', function () {
 
     it('should reject by timeout', function () {
       const res = pendings.set(1, noop, {timeout: 5});
+      res.catch(() => {});
       return wait(10).then(() => assert.isRejected(res, 'Promise rejected by timeout (5 ms)'));
     });
 

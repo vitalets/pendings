@@ -17,9 +17,9 @@ npm install pendings --save
 
 ## Features
 * automatically store `resolve` / `reject` callbacks for later fulfillment
-* automatically return existing promise for several calls until promise is fulfilled
+* automatically return existing promise for all calls until promise is fulfilled
 * automatic reject promise after configured `timeout`
-* convenient manipulation with list of promises: dynamic insert and `waitAll()` method 
+* flexible manipulation with list of promises: dynamic insert and `waitAll()` method
 
 ## Usage (single promise)
 Typical situation with promises in event-based code:
@@ -128,10 +128,11 @@ class Foo {
 Creates instance of single pending promise. It holds `resolve / reject` callbacks for future fulfillment.
 
 
-| Param | Type |
-| --- | --- |
-| [options] | <code>Object</code> | 
-| [options.timeout] | <code>Number</code> | 
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [options] | <code>Object</code> |  |  |
+| [options.timeout] | <code>Number</code> | <code>0</code> |  |
+| [options.autoReset] | <code>String</code> | <code>&#x27;never&#x27;</code> | automatically reset pending to initial state. Possible values are: `never`, `fufilled`, `resolved`, `rejected`. |
 
 <a name="Pending+promise"></a>
 

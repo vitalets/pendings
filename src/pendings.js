@@ -25,7 +25,7 @@ class Pendings {
   constructor(options) {
     this._options = mergeOptions(DEFAULT_OPTIONS, options);
     this._map = Object.create(null);
-    this._waitingAll = new Pending();
+    this._waitingAll = new Pending({autoReset: 'never'});
   }
 
   /**

@@ -7,15 +7,25 @@
 const TimeoutError = require('./timeout-error');
 const {mergeOptions} = require('./utils');
 
+const AUTO_RESET = {
+  NEVER: 'never',
+  FULFILLED: 'fulfilled',
+  RESOLVED: 'resolved',
+  REJECTED: 'rejected',
+};
+
 const DEFAULT_OPTIONS = {
   timeout: 0,
+  autoReset: AUTO_RESET.NEVER,
 };
 
 class Pending {
   /**
    * Creates instance of single pending promise. It holds `resolve / reject` callbacks for future fulfillment.
    * @param {Object} [options]
-   * @param {Number} [options.timeout]
+   * @param {Number} [options.timeout=0]
+   * @param {String} [options.autoReset='never'] automatically reset pending to initial state.
+   * Possible values are: `never`, `fufilled`, `resolved`, `rejected`.
    */
   constructor(options) {
     this._options = mergeOptions(DEFAULT_OPTIONS, options);
@@ -232,6 +242,19 @@ class Pending {
 
   _postFulfill() {
     this._onFulfilled(this);
+    this._applyAutoReset();
+  }
+
+  _applyAutoReset() {
+    const {autoReset} = this._options;
+    const needReset = [
+      autoReset === AUTO_RESET.FULFILLED,
+      this._isResolved && autoReset === AUTO_RESET.RESOLVED,
+      this._isRejected && autoReset === AUTO_RESET.REJECTED
+    ].some(Boolean);
+    if (needReset) {
+      this.reset();
+    }
   }
 }
 
