@@ -24,13 +24,18 @@ class Pending {
    * Creates instance of single pending promise. It holds `resolve / reject` callbacks for future fulfillment.
    * @param {Object} [options]
    * @param {Number} [options.timeout=0]
-   * @param {String} [options.autoReset='never'] condition for auto-reset pending to initial state. Possible values:
-   * - `never`: calling `.call()` will return existing promise except first call.
-   * - `fufilled`: calling `.call()` will return existing promise while promise is pending.
-   * - `rejected`: calling `.call()` will return existing promise while promise is pending or if it was resolved.
-   * If promise was rejected, `.call()` will construct and return new promise.
-   * - `resolved`: calling `.call()` will return existing promise while promise is pending or if it was rejected.
-   * If promise was resolved, `.call()` will construct and return new promise.
+   * @param {String} [options.autoReset='never'] Condition for auto-reset. It is important for the result of
+   * [.call()](#Pending+call) method:
+   * <ul>
+   * <li>**never**: never reset, so `.call()` always returns existing promise while it is pending and when
+   * fulfilled</li>
+   * <li>**fufilled**: reset when fulfilled, so `.call()` returns existing promise while it is pending and creates
+   * new promise when fulfilled</li>
+   * <li>**rejected**: reset only rejected, so `.call()` returns existing promise while it is pending or when
+   * resolved and creates new promise when rejected</li>
+   * <li>**resolved**: reset only resolved, so `.call()` returns existing promise while it is pending or when
+   * rejected and creates new promise when resolved</li>
+   * </ul>
    */
   constructor(options) {
     this._options = mergeOptions(DEFAULT_OPTIONS, options);
