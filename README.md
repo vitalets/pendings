@@ -132,7 +132,7 @@ Creates instance of single pending promise. It holds `resolve / reject` callback
 | --- | --- | --- | --- |
 | [options] | <code>Object</code> |  |  |
 | [options.timeout] | <code>Number</code> | <code>0</code> |  |
-| [options.autoReset] | <code>String</code> | <code>&#x27;never&#x27;</code> | automatically reset pending to initial state. Possible values are: `never`, `fufilled`, `resolved`, `rejected`. |
+| [options.autoReset] | <code>String</code> | <code>&#x27;never&#x27;</code> | condition for auto-reset pending to initial state. Possible values: - `never`: calling `.call()` will return existing promise except first call. - `fufilled`: calling `.call()` will return existing promise while promise is pending. - `rejected`: calling `.call()` will return existing promise while promise is pending or if it was resolved. If promise was rejected, `.call()` will construct and return new promise. - `resolved`: calling `.call()` will return existing promise while promise is pending or if it was rejected. If promise was resolved, `.call()` will construct and return new promise. |
 
 <a name="Pending+promise"></a>
 
